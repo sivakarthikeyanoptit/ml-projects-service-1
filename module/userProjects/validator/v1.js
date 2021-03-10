@@ -34,6 +34,9 @@ module.exports = (req) => {
             req.checkBody('templateId').exists().withMessage("required template id");
             req.checkBody('entityId').exists().withMessage("required entity id");
             req.checkBody('role').exists().withMessage("required role");
+        },
+        add : function () {
+            req.checkBody('title').exists().withMessage("required project title");
         }
     }
 

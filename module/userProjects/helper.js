@@ -960,6 +960,7 @@ module.exports = class UserProjectsHelper {
                     await this.createProgramAndSolution(
                         data.programId,
                         data.programName,
+                        updateProject.entityId ? [updateProject.entityId] : "",
                         userToken,
                         userProject[0].solutionInformation && userProject[0].solutionInformation._id ?
                         userProject[0].solutionInformation._id : ""
@@ -2369,8 +2370,8 @@ module.exports = class UserProjectsHelper {
                     await this.createProgramAndSolution(
                         data.programId,
                         data.programName,
-                        userToken,
-                        ""
+                        createProject.entityId ? [createProject.entityId] : "",
+                        userToken
                     );
 
                     if (!programAndSolutionInformation.success) {
@@ -2426,6 +2427,7 @@ module.exports = class UserProjectsHelper {
                     }
                 });
 
+                createProject["appInformation"] = {};
                 if( appName !== "" ) {
                     createProject["appInformation"]["appName"] = appName;
                 }

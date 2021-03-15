@@ -1906,7 +1906,7 @@ module.exports = class UserProjectsHelper {
                         { isAPrivateProgram : false }
                     ];
 
-                }else if(filter == CONSTANTS.common.CREATED_BY_ME){
+                } else if(filter == CONSTANTS.common.CREATED_BY_ME){
 
                     filterQuery = [
                         { isAPrivateProgram: { $ne: false }} 
@@ -2468,6 +2468,112 @@ module.exports = class UserProjectsHelper {
             }
         })
     }
+
+    /**
+    * Get list of user projects with the targetted ones.
+    * @method
+    * @name userAssigned 
+    * @param {String} userId - Logged in user id.
+    * @param {Number} pageSize - Page size.
+    * @param {Number} pageNo - Page No.
+    * @param {String} search - Search text.
+    * @param {String} filter - filter text.
+    * @returns {Object}
+   */
+
+  static userAssigned( userId,pageSize,pageNo,search, filter ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let query = {
+                userId : userId,
+                isDeleted : false,
+                programId : { $exists : true }
+            }
+
+            let searchQuery = [];
+            let filterQuery = [];
+
+            if (search !== "") {
+                searchQuery = [
+                    { "title" : new RegExp(search, 'i') },
+                    { "description" : new RegExp(search, 'i') }
+                ];
+            }
+
+            if (filter && filter !== "") {
+                if(filter == CONSTANTS.common.ASSIGN_TO_ME) {
+
+                    filterQuery = [
+                        { isAPrivateProgram : false }
+                    ];
+
+                } else if(filter == CONSTANTS.common.CREATED_BY_ME) {
+
+                    filterQuery = [
+                        { isAPrivateProgram: { $ne: false }} 
+                    ];
+                }
+
+                query = {...query, ...filterQuery[0]};
+                
+            }
+
+            let projects = await this.projects(
+                query,
+                pageSize,
+                pageNo,
+                searchQuery,    
+                ["title", "description","solutionId","programId","programInformation.name","projectTemplateId","solutionExternalId"]
+            );
+
+            let totalCount = 0;
+            let data = [];
+
+            if( projects.success && projects.data ) {
+
+                totalCount = projects.data.count;
+                data = projects.data.data;
+
+                if( data.length > 0 ) {
+                    data.forEach( projectData => {
+                        projectData.name = projectData.title;
+                        projectData.programName = projectData.programInformation.name;
+                        delete projectData.programInformation;
+                        projectData.externalId = projectData.solutionExternalId;
+                        delete projectData.solutionExternalId;
+                        projectData.type = CONSTANTS.common.IMPROVEMENT_PROJECT;
+
+                        delete projectData.title;
+                    });
+                }
+            }
+            
+            return resolve({
+                success : true,
+                message : CONSTANTS.apiResponses.USER_ASSIGNED_PROJECT_FETCHED,
+                data : {
+                    data: data,
+                    count: totalCount
+                }
+            });
+
+        } catch (error) {
+            return resolve({
+                success : false,
+                message : error.message,
+                status : 
+                error.status ? 
+                error.status : HTTP_STATUS_CODE['internal_server_error'].status,
+                data : {
+                    description : CONSTANTS.common.PROJECT_DESCRIPTION,
+                    data : [],
+                    count : 0
+                }
+            });
+        }
+    })
+  }
 };
 
 /**

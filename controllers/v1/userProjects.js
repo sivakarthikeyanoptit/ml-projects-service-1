@@ -1282,4 +1282,66 @@ module.exports = class UserProjects extends Abstract {
             }
         })
     }
+
+      /**
+    * @api {get} /improvement-project/api/v1/userProjects/userAssigned?page=:page&limit=:limit&search=:search&filter=:assignedToMe
+    * List of user assigned project.
+    * @apiVersion 1.0.0
+    * @apiGroup User Projects
+    * @apiSampleRequest /improvement-project/api/v1/userProjects/userAssigned?page=1&limit=10
+    * @apiParamExample {json} Response:
+    * {
+    "message": "User project fetched successfully",
+    "status": 200,
+    "result": {
+        "data": [
+            {
+                "_id": "6049c282348d1b060c6454b7",
+                "solutionId": "6049c277f026c305dd471769",
+                "programId": "6049c275f026c305dd471768",
+                "name": "TEST TITLE",
+                "programName": "NEW",
+                "externalId": "01c04166-a65e-4e92-a87b-a9e4194e771d-1615446645973",
+                "type": "improvementProject"
+            }
+        ],
+        "count": 1
+    }}
+    * @apiUse successBody
+    * @apiUse errorBody
+    */
+
+    /**
+      * List of user assigned projects.
+      * @method
+      * @name userAssigned
+      * @param {Object} req - request data.
+      * @returns {JSON} List of user assigned projects.
+     */
+    
+     async userAssigned(req) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let projects = await userProjectsHelper.userAssigned(
+                    req.userDetails.userInformation.userId,
+                    req.pageSize,
+                    req.pageNo,
+                    req.searchText,
+                    req.query.filter
+                );
+
+                projects.result = projects.data;
+                
+                return resolve(projects);
+
+            } catch (error) {
+                return reject({
+                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+        })
+    }
 };

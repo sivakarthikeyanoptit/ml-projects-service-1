@@ -1900,22 +1900,14 @@ module.exports = class UserProjectsHelper {
                 ];
             }
 
-            if (filter && filter !== "") {
-                if(filter == CONSTANTS.common.ASSIGN_TO_ME){
+            bodyData["filter"] = {};
 
-                    filterQuery = [
-                        { isAPrivateProgram : false }
-                    ];
-
-                }else if(filter == CONSTANTS.common.CREATED_BY_ME){
-
-                    filterQuery = [
-                        { isAPrivateProgram: { $ne: false }} 
-                    ];
+            if ( filter && filter !== "" ) {
+                if( filter === CONSTANTS.common.CREATED_BY_ME ) {
+                    query["isAPrivateProgram"] = bodyData["filter"]["isAPrivateProgram"] = true;
+                } else if( filter == CONSTANTS.common.ASSIGN_TO_ME ) {
+                    query["isAPrivateProgram"] = bodyData["filter"]["isAPrivateProgram"] = false;
                 }
-
-                query = {...query, ...filterQuery[0]};
-                
             }
 
             let projects = await this.projects(
@@ -1954,7 +1946,6 @@ module.exports = class UserProjectsHelper {
                 }
             }
 
-            bodyData["filter"] = {};
             if( solutionIds.length > 0 ) {
                 bodyData["filter"]["skipSolutions"] = solutionIds;
             }
@@ -1962,10 +1953,6 @@ module.exports = class UserProjectsHelper {
             bodyData.filter["projectTemplateId"] = {
                 $exists : true
             };
-
-            if(filterQuery && filterQuery.length > 0){
-                bodyData["filter"] = {...bodyData.filter,...filterQuery[0]}
-            }
 
             let targetedSolutions = 
             await kendraService.solutionBasedOnRoleAndLocation(

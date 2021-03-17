@@ -1912,8 +1912,8 @@ module.exports = class UserProjectsHelper {
 
             let projects = await this.projects(
                 query,
-                pageSize,
-                pageNo,
+                CONSTANTS.common.DEFAULT_PAGE_SIZE,
+                CONSTANTS.common.DEFAULT_PAGE_NO,
                 searchQuery,
                 ["title", "description","solutionId","programId","programInformation.name","projectTemplateId","solutionExternalId"]
             );
@@ -1986,7 +1986,7 @@ module.exports = class UserProjectsHelper {
             }
 
             if( mergedData.length > 0 ) {
-                let startIndex = pageSize * (pageNo - 1);
+                let startIndex =    pageSize * (pageNo - 1);
                 let endIndex = startIndex + pageSize;
                 mergedData = mergedData.slice(startIndex,endIndex); 
             }

@@ -1886,12 +1886,10 @@ module.exports = class UserProjectsHelper {
 
             let query = {
                 userId : userId,
-                isDeleted : false,
-                programId : { $exists : true }
+                isDeleted : false
             }
 
             let searchQuery = [];
-            let filterQuery = [];
 
             if (search !== "") {
                 searchQuery = [

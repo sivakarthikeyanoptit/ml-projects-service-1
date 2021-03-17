@@ -1902,7 +1902,9 @@ module.exports = class UserProjectsHelper {
 
             if ( filter && filter !== "" ) {
                 if( filter === CONSTANTS.common.CREATED_BY_ME ) {
-                    query["isAPrivateProgram"] = bodyData["filter"]["isAPrivateProgram"] = true;
+                    query["isAPrivateProgram"] = bodyData["filter"]["isAPrivateProgram"] = {
+                        "$ne" : false
+                    };
                 } else if( filter == CONSTANTS.common.ASSIGN_TO_ME ) {
                     query["isAPrivateProgram"] = bodyData["filter"]["isAPrivateProgram"] = false;
                 }
@@ -1929,10 +1931,17 @@ module.exports = class UserProjectsHelper {
                 if( mergedData.length > 0 ) {
                     mergedData.forEach( projectData => {
                         projectData.name = projectData.title;
-                        projectData.programName = projectData.programInformation.name;
-                        delete projectData.programInformation;
-                        projectData.externalId = projectData.solutionExternalId;
-                        delete projectData.solutionExternalId;
+
+                        if( projectData.programInformation ) {
+                            projectData.programName = projectData.programInformation.name;
+                            delete projectData.programInformation;
+                        }
+
+                        if( projectData.solutionExternalId ) {
+                            projectData.externalId = projectData.solutionExternalId;
+                            delete projectData.solutionExternalId;
+                        }
+
                         projectData.type = CONSTANTS.common.IMPROVEMENT_PROJECT;
                         
                         if( projectData.solutionId ) {

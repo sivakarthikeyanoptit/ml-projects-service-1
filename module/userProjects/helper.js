@@ -1919,8 +1919,8 @@ module.exports = class UserProjectsHelper {
 
             let projects = await this.projects(
                 query,
-                pageSize,
-                pageNo,
+                CONSTANTS.common.DEFAULT_PAGE_SIZE,
+                CONSTANTS.common.DEFAULT_PAGE_NO,
                 searchQuery,
                 ["title", "description","solutionId","programId","programInformation.name","projectTemplateId","solutionExternalId"]
             );
@@ -2492,7 +2492,6 @@ module.exports = class UserProjectsHelper {
             }
 
             let searchQuery = [];
-            let filterQuery = [];
 
             if (search !== "") {
                 searchQuery = [
@@ -2501,22 +2500,14 @@ module.exports = class UserProjectsHelper {
                 ];
             }
 
-            if (filter && filter !== "") {
-                if(filter == CONSTANTS.common.ASSIGN_TO_ME) {
-
-                    filterQuery = [
-                        { isAPrivateProgram : false }
-                    ];
-
-                } else if(filter == CONSTANTS.common.CREATED_BY_ME) {
-
-                    filterQuery = [
-                        { isAPrivateProgram: { $ne: false }} 
-                    ];
+            if ( filter && filter !== "" ) {
+                if( filter === CONSTANTS.common.CREATED_BY_ME ) {
+                    query["isAPrivateProgram"] = {
+                        $ne : false
+                    };
+                } else if( filter == CONSTANTS.common.ASSIGN_TO_ME ) {
+                    query["isAPrivateProgram"] = false;
                 }
-
-                query = {...query, ...filterQuery[0]};
-                
             }
 
             let projects = await this.projects(

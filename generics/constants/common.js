@@ -28,6 +28,8 @@ module.exports = {
     "RESOURCE_TYPE" : "Improvement Project Solution",
     "ENGLISH_LANGUAGE" : "English",
     "KEYWORDS" : "Improvement Project",
-    "ASSIGN_TO_ME" : "assignedToMe",
-    "CREATED_BY_ME" : "createdByMe"
+    "ASSIGN_TO_ME" : "assignedToMe",    
+    "CREATED_BY_ME" : "createdByMe",
+    "DEFAULT_PAGE_NO" : 1,
+    "DEFAULT_PAGE_SIZE" : 100
 };

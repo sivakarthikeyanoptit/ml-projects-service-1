@@ -2114,7 +2114,10 @@ module.exports = class UserProjectsHelper {
                     if( appVersion !== "" ) {
                         projectCreation.data["appInformation"]["appVersion"] = appVersion;
                     }
-    
+                
+                    projectCreation.userRoleInformtion = bodyData;
+                    
+
                     if( 
                         !targetedSolutions.data.entityType ||
                         !bodyData[targetedSolutions.data.entityType] 
@@ -2428,6 +2431,10 @@ module.exports = class UserProjectsHelper {
 
                 if( appVersion !== "" ) {
                     createProject["appInformation"]["appVersion"] = appVersion;
+                }
+
+                if (data.profileInformation) {
+                    createProject.userRoleInformtion = data.profileInformation;
                 }
 
                 let userProject = await database.models.projects.create(

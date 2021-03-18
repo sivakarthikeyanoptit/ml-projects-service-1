@@ -1231,6 +1231,12 @@ module.exports = class UserProjects extends Abstract {
     “lastDownloadedAt” : "2020-09-29T09:08:41.667Z",
     "payload": {
         "_id": "289d9558-b98f-41cf-81d3-92486f114a51"
+    },
+    "profileInformation" : {
+        "role" : "HM",
+   		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
+        "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
+        "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
     }}
     * @apiParamExample {json} Response:
     * {

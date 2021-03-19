@@ -2430,6 +2430,8 @@ module.exports = class UserProjectsHelper {
                     createProject["appInformation"]["appVersion"] = appVersion;
                 }
 
+                createProject["lastDownloadedAt"] = new Date();
+
                 let userProject = await database.models.projects.create(
                     createProject
                 );
@@ -2448,7 +2450,8 @@ module.exports = class UserProjectsHelper {
                         programId : 
                         userProject.programInformation && userProject.programInformation._id ?
                         userProject.programInformation._id : "",
-                        projectId: userProject._id
+                        projectId: userProject._id,
+                        lastDownloadedAt : userProject.lastDownloadedAt
                     } 
                 });
 

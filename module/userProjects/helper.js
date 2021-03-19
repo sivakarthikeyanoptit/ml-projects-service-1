@@ -2432,6 +2432,10 @@ module.exports = class UserProjectsHelper {
 
                 createProject["lastDownloadedAt"] = new Date();
 
+                if (data.profileInformation) {
+                    createProject.userRoleInformtion = data.profileInformation;
+                }
+                
                 let userProject = await database.models.projects.create(
                     createProject
                 );

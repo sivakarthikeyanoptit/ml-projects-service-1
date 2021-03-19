@@ -110,6 +110,7 @@ module.exports = {
             index : true
         },
         isAPrivateProgram : Boolean,
-        appInformation : Object
+        appInformation : Object,
+        userRoleInformtion : Object
     }
 };

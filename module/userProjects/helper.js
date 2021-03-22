@@ -2116,29 +2116,26 @@ module.exports = class UserProjectsHelper {
                     }
     
                     if( 
-                        !targetedSolutions.data.entityType ||
-                        !bodyData[targetedSolutions.data.entityType] 
+                        targetedSolutions.data.entityType &&
+                        bodyData[targetedSolutions.data.entityType] 
                     ) {
-                        throw {
-                            message : CONSTANTS.apiResponses.ENTITY_TYPE_MIS_MATCHED
+
+                        let entityInformation = 
+                        await assessmentService.listEntitiesByLocationIds(
+                            userToken,
+                            [bodyData[targetedSolutions.data.entityType]] 
+                        );
+        
+                        if( !entityInformation.success ) {
+                            return resolve(entityInformation);
                         }
+        
+                        projectCreation.data["entityInformation"] = _entitiesMetaInformation(
+                            entityInformation.data
+                        )[0];
+        
+                        projectCreation.data.entityId = entityInformation.data[0]._id;
                     }
-    
-                    let entityInformation = 
-                    await assessmentService.listEntitiesByLocationIds(
-                        userToken,
-                        [bodyData[targetedSolutions.data.entityType]] 
-                    );
-    
-                    if( !entityInformation.success ) {
-                        return resolve(entityInformation);
-                    }
-    
-                    projectCreation.data["entityInformation"] = _entitiesMetaInformation(
-                        entityInformation.data
-                    )[0];
-    
-                    projectCreation.data.entityId = entityInformation.data[0]._id;
     
                     projectCreation.data.status = CONSTANTS.common.NOT_STARTED_STATUS;
                     projectCreation.data.lastDownloadedAt = new Date();

@@ -377,7 +377,7 @@ module.exports = class ReportsHelper {
                 }
 
                 programs = _.uniqBy(programs, function (program) {
-                    return program.id;
+                    return program._id;
                 });
 
                 return resolve({

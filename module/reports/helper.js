@@ -334,10 +334,13 @@ module.exports = class ReportsHelper {
                     query = {
                         "entityId": ObjectId(entityId),
                     }
-                } else if (userRole != "" && userId != "") {
+                } else if (userRole != "") {
                     query = {
-                        "userId": userId,
                         "userRole": userRole
+                    }
+                } else if (userId != "") {
+                    query = {
+                        "userId": userId
                     }
                 } else {
                     throw new Error("Missing user role or entity id.")

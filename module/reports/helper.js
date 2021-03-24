@@ -329,7 +329,10 @@ module.exports = class ReportsHelper {
             try {
 
                 let query = {
-                    "userId": userId
+                    "userId": userId,
+                    programId : {
+                        $exists : true
+                    }
                 };
 
                 if(entityId != "" && UTILS.isValidMongoId(entityId)) {

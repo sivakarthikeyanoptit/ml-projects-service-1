@@ -343,7 +343,7 @@ module.exports = class ReportsHelper {
                         "userId": userId
                     }
                 } else {
-                    throw new Error("Missing user role or entity id.")
+                    throw new Error("Missing userId, user role or entity id.")
                 }
 
 

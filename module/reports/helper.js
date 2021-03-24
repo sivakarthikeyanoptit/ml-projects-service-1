@@ -339,10 +339,6 @@ module.exports = class ReportsHelper {
                 if (userRole != "") {
                     query.userRole = userRole;
                 }
-                
-                if(userId == "" || entityId == "" || userRole == "") {
-                    throw new Error("Missing userId, user role or entity id.")
-                }
 
 
                 let searchQuery = [];

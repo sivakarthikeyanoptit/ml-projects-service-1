@@ -328,21 +328,19 @@ module.exports = class ReportsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let query = {};
+                let query = {
+                    "userId": userId
+                };
 
                 if(entityId != "" && UTILS.isValidMongoId(entityId)) {
-                    query = {
-                        "entityId": ObjectId(entityId),
-                    }
-                } else if (userRole != "") {
-                    query = {
-                        "userRole": userRole
-                    }
-                } else if (userId != "") {
-                    query = {
-                        "userId": userId
-                    }
-                } else {
+                    query.entityId = ObjectId(entityId);
+                } 
+                
+                if (userRole != "") {
+                    query.userRole = userRole;
+                }
+                
+                if(userId == "" || entityId == "" || userRole == "") {
                     throw new Error("Missing userId, user role or entity id.")
                 }
 

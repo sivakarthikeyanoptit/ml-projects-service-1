@@ -337,7 +337,12 @@ module.exports = class ReportsHelper {
                 } 
                 
                 if (userRole != "") {
-                    query.userRole = userRole;
+                    query.userRole = {
+                        $in : [
+                            "",
+                            userRole
+                        ]
+                    }
                 }
 
 

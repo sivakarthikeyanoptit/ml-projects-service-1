@@ -354,12 +354,19 @@ module.exports = class ReportsHelper {
                     searchQuery = [{ "programInformation.name": new RegExp(search, 'i') }];
                 }
 
+                let groupBy =  {
+                        _id: '$programId',
+                        "programName": { '$first': '$programInformation.name' },
+                        programId: { '$first': '$programId' }
+                }
+
                 const projectDocuments = await userProjectsHelper.projects(
                     query,
                     pageSize,
                     pageNo,
                     searchQuery,
-                    ["programInformation.name","programId", "userId"]
+                    ["programInformation","programId", "userId"],
+                    groupBy
                 );
 
                 if (projectDocuments.data && projectDocuments.data.count && projectDocuments.data.count == 0) {
@@ -373,14 +380,10 @@ module.exports = class ReportsHelper {
                 let projectDetails = projectDocuments.data.data;
                 for (let index = 0; index < projectDetails.length; index++) {
                     programs.push({
-                        name: projectDetails[index].programInformation.name,
+                        name: projectDetails[index].programName,
                         _id: projectDetails[index].programId.toString()
                     });
                 }
-
-                programs = _.uniqBy(programs, function (program) {
-                    return program._id;
-                });
 
                 return resolve({
                     success: true,

@@ -1101,7 +1101,8 @@ module.exports = class UserProjectsHelper {
                     data : {
                         programId : 
                         projectUpdated.programInformation && projectUpdated.programInformation._id ?
-                        projectUpdated.programInformation._id : ""
+                        projectUpdated.programInformation._id : "",
+                        hasAcceptedTAndC : projectUpdated.hasAcceptedTAndC ? projectUpdated.hasAcceptedTAndC : false
                     } 
                 });
 
@@ -2027,12 +2028,37 @@ module.exports = class UserProjectsHelper {
      * @param {String} userId - logged in user id.
      * @param {String} userToken - logged in user token.
      * @param {Object} bodyData - Requested body data.
+     * @param {String} [appName = ""] - App name.
+     * @param {String} [appVersion = ""] - App version.
      * @returns {Object} Project details.
     */
 
-   static detailsV2( projectId,solutionId,userId,userToken,bodyData,appName = "",appVersion = "" ) {
+   static detailsV2( projectId,solutionId,userId,userToken,bodyData,appName = "",appVersion = "",templateId = "" ) {
     return new Promise(async (resolve, reject) => {
         try {
+            
+            let solutionExternalId = "";
+            
+            if( templateId !== "" ) {
+                
+                let templateDocuments = 
+                await projectTemplatesHelper.templateDocument({
+                    "externalId" : templateId,
+                    "isReusable" : false,
+                    "solutionId" : { $exists : true }
+                },["solutionId","solutionExternalId"]);
+            
+                if( !templateDocuments.length > 0 ) {
+                    throw {
+                        message : CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
+                        status : HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
+
+            
+                solutionId = templateDocuments[0].solutionId;
+                solutionExternalId = templateDocuments[0].solutionExternalId;
+            }
 
             if( projectId === "" ) {
 
@@ -2045,23 +2071,42 @@ module.exports = class UserProjectsHelper {
                     projectId = projectDetails[0]._id;
                 } else {
                     
-                    let targetedSolutions = 
-                    await kendraService.solutionDetailsBasedOnRoleAndLocation(
-                        userToken,
-                        bodyData,
-                        solutionId
-                    );
+                    let solutionDetails = {}
+
+                    if( templateId === "" ) {
+                        
+                        solutionDetails = 
+                        await kendraService.solutionDetailsBasedOnRoleAndLocation(
+                            userToken,
+                            bodyData,
+                            solutionId
+                        );
     
-                    if( !targetedSolutions.success || (targetedSolutions.data.data && !targetedSolutions.data.data.length > 0) ) {
-                        throw {
-                            status : HTTP_STATUS_CODE["bad_request"].status,
-                            message : CONSTANTS.apiResponses.SOLUTION_DOES_NOT_EXISTS_IN_SCOPE
+                        if( !solutionDetails.success || (solutionDetails.data.data && !solutionDetails.data.data.length > 0) ) {
+                            throw {
+                                status : HTTP_STATUS_CODE["bad_request"].status,
+                                message : CONSTANTS.apiResponses.SOLUTION_DOES_NOT_EXISTS_IN_SCOPE
+                            }
                         }
+
+                        solutionDetails = solutionDetails.data;
+    
+                    } else {
+                        solutionDetails =
+                        await assessmentService.listSolutions([solutionExternalId]);
+
+                        if( !solutionDetails.success ) {
+                            throw {
+                                message : CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+                                status : HTTP_STATUS_CODE['bad_request'].status
+                            }
+                        }
+                        solutionDetails = solutionDetails.data[0];
                     }
     
                     let projectCreation = 
                     await this.userAssignedProjectCreation(
-                        targetedSolutions.data.projectTemplateId,
+                        solutionDetails.projectTemplateId,
                         userId,
                         userToken
                     );
@@ -2071,23 +2116,23 @@ module.exports = class UserProjectsHelper {
                     }
     
                     projectCreation.data["isAPrivateProgram"] = 
-                    targetedSolutions.data.isAPrivateProgram;
+                    solutionDetails.isAPrivateProgram;
     
                     projectCreation.data.programInformation = {
-                        _id : ObjectId(targetedSolutions.data.programId),
-                        externalId : targetedSolutions.data.programExternalId,
+                        _id : ObjectId(solutionDetails.programId),
+                        externalId : solutionDetails.programExternalId,
                         description : 
-                        targetedSolutions.data.programDescription ? targetedSolutions.data.programDescription : "",
-                        name : targetedSolutions.data.programName
+                        solutionDetails.programDescription ? solutionDetails.programDescription : "",
+                        name : solutionDetails.programName
                     }
     
                     projectCreation.data.solutionInformation = {
-                        _id : ObjectId(targetedSolutions.data._id),
-                        externalId : targetedSolutions.data.externalId,
+                        _id : ObjectId(solutionDetails._id),
+                        externalId : solutionDetails.externalId,
                         description : 
-                        targetedSolutions.data.description ? 
-                        targetedSolutions.data.description : "",
-                        name : targetedSolutions.data.name
+                        solutionDetails.description ? 
+                        solutionDetails.description : "",
+                        name : solutionDetails.name
                     };
     
                     projectCreation.data["programId"] = 
@@ -2114,27 +2159,37 @@ module.exports = class UserProjectsHelper {
                     if( appVersion !== "" ) {
                         projectCreation.data["appInformation"]["appVersion"] = appVersion;
                     }
-    
-                    if( 
-                        targetedSolutions.data.entityType &&
-                        bodyData[targetedSolutions.data.entityType] 
-                    ) {
 
-                        let entityInformation = 
-                        await assessmentService.listEntitiesByLocationIds(
-                            userToken,
-                            [bodyData[targetedSolutions.data.entityType]] 
-                        );
-        
-                        if( !entityInformation.success ) {
-                            return resolve(entityInformation);
+                    if( bodyData && Object,keys(bodyData).length > 0 ) {
+
+                        if( bodyData.hasAcceptedTAndC ) {
+                            projectCreation.data.hasAcceptedTAndC = bodyData.hasAcceptedTAndC;
                         }
+
+                        if( bodyData.role ) {
+                            projectCreation.data["userRole"] = bodyData.role;
+                        }
+
+                        if( 
+                            solutionDetails.entityType && bodyData[solutionDetails.entityType] 
+                        ) {
+                            let entityInformation = 
+                            await assessmentService.listEntitiesByLocationIds(
+                                userToken,
+                                [bodyData[solutionDetails.entityType]] 
+                            );
         
-                        projectCreation.data["entityInformation"] = _entitiesMetaInformation(
-                            entityInformation.data
-                        )[0];
+                            if( !entityInformation.success ) {
+                                return resolve(entityInformation);
+                            }
         
-                        projectCreation.data.entityId = entityInformation.data[0]._id;
+                            projectCreation.data["entityInformation"] = _entitiesMetaInformation(
+                                entityInformation.data
+                            )[0];
+        
+                            projectCreation.data.entityId = entityInformation.data[0]._id;
+                        }
+
                     }
     
                     projectCreation.data.status = CONSTANTS.common.NOT_STARTED_STATUS;

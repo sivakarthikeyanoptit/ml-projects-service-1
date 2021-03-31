@@ -111,6 +111,10 @@ module.exports = {
         },
         isAPrivateProgram : Boolean,
         appInformation : Object,
-        userRoleInformtion : Object
+        userRoleInformtion : Object,
+        hasAcceptedTAndC : {
+            type : Boolean,
+            default : false
+        }
     }
 };

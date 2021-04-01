@@ -115,6 +115,7 @@ module.exports = {
         hasAcceptedTAndC : {
             type : Boolean,
             default : false
-        }
+        },
+        referenceFrom : String
     }
 };

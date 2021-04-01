@@ -2177,6 +2177,10 @@ module.exports = class UserProjectsHelper {
                         if( bodyData.hasAcceptedTAndC ) {
                             projectCreation.data.hasAcceptedTAndC = bodyData.hasAcceptedTAndC;
                         }
+
+                        if( bodyData.referenceFrom ) {
+                            projectCreation.data.referenceFrom = bodyData.referenceFrom;
+                        }
     
                         if( bodyData.role ) {
                             projectCreation.data["userRole"] = bodyData.role;

@@ -13,6 +13,7 @@ const projectTemplatesHelper = require(MODULES_BASE_PATH + "/project/templates/h
 const projectTemplateTasksHelper = require(MODULES_BASE_PATH + "/project/templateTasks/helper");
 const { v4: uuidv4 } = require('uuid');
 const assessmentService = require(GENERICS_FILES_PATH + "/services/assessment");
+const dhitiService = require(GENERICS_FILES_PATH + "/services/dhiti");
 
 /**
     * UserProjectsHelper
@@ -2539,6 +2540,116 @@ module.exports = class UserProjectsHelper {
             }
         })
     }
+
+
+     /**
+       * share project and task pdf report.
+       * @method
+       * @name share 
+       * @param {String} [projectId] - projectId.
+       * @returns {Object} Downloadable pdf url.
+     */
+
+    static share(projectId = "", taskIds = [], userToken) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let projectPdf = true;
+                let projectDocument = [];
+
+                let query = {
+                    _id: projectId
+                }
+
+                if (!taskIds.length ) {
+
+                    projectDocument = await this.projectDocument
+                    (
+                        query,
+                        [
+                            "title",
+                            "status",  
+                            "metaInformation.goal",
+                            "metaInformation.duration",
+                            "startDate",
+                            "endDate",
+                            "tasks",
+                            "categories"
+                        ]
+                    );
+                }
+                else {
+                    projectPdf = false;
+                    
+                    let aggregateData = [
+                    { "$match": { _id: ObjectId(projectId)} },
+                    { "$project": {
+                        "status": 1, "title": 1, "startDate": 1, "metaInformation.goal": 1, "metaInformation.duration":1,
+                        tasks: { "$filter": {
+                            input: '$tasks',
+                            as: 'tasks',
+                            cond: { "$in": ['$$tasks._id', taskIds]}
+                        }}
+                    }}]
+                   
+                    projectDocument = await database.models.projects.aggregate(aggregateData);
+                }
+              
+                if (!projectDocument.length) {
+                    throw {
+                        message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
+                        status: HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
+
+                projectDocument = projectDocument[0];
+                projectDocument.goal = projectDocument.metaInformation ? projectDocument.metaInformation.goal : "";
+                projectDocument.duration = projectDocument.metaInformation ? projectDocument.metaInformation.duration : "";
+        
+                projectDocument.category = [];
+
+                if (projectDocument.categories && projectDocument.categories.length > 0) {
+                    projectDocument.categories.forEach( category => {
+                        projectDocument.category.push(category.name);
+                    })
+                }
+
+                delete projectDocument.categories;
+                delete projectDocument.metaInformation;
+               
+                let response = await dhitiService.projectAndTaskReport(userToken, projectDocument, projectPdf);
+
+                if (response && response.success == true) {
+                    return resolve({
+                        success: true,
+                        message: CONSTANTS.apiResponses.REPORT_GENERATED,
+                        data: {
+                            data: {
+                                downloadUrl: response.data.pdfUrl
+                            }
+                        }
+                    });
+                }
+
+                else {
+                    throw {
+                        message: CONSTANTS.apiResponses.COULD_NOT_GENERATE_PDF_REPORT,
+                    }
+                }
+
+            } catch (error) {
+                return resolve({
+                    status:
+                        error.status ?
+                            error.status : HTTP_STATUS_CODE['internal_server_error'].status,
+                    success: false,
+                    message: error.message,
+                    data: {}
+                });
+            }
+        })
+    }
+
 };
 
 /**

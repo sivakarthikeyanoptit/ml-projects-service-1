@@ -2555,31 +2555,46 @@ module.exports = class UserProjectsHelper {
             try {
 
                 let projectPdf = true;
+                let projectDocument = [];
 
                 let query = {
                     _id: projectId
                 }
 
-                if (taskIds.length > 0 ) {
-                    projectPdf = false;
-                    query["tasks._id"] = { $in : taskIds}
+                if (!taskIds.length ) {
+
+                    projectDocument = await this.projectDocument
+                    (
+                        query,
+                        [
+                            "title",
+                            "status",  
+                            "metaInformation.goal",
+                            "metaInformation.duration",
+                            "startDate",
+                            "endDate",
+                            "tasks",
+                            "categories"
+                        ]
+                    );
                 }
-
-                let projectDocument = await this.projectDocument
-                (
-                    query,
-                    [
-                      "title",
-                      "status",  
-                      "metaInformation.goal",
-                      "metaInformation.duration",
-                      "startDate",
-                      "endDate",
-                      "tasks",
-                      "categories"
-                    ]
-                );
-
+                else {
+                    projectPdf = false;
+                    
+                    let aggregateData = [
+                    { "$match": { _id: ObjectId(projectId)} },
+                    { "$project": {
+                        "status": 1, "title": 1, "startDate": 1, "metaInformation.goal": 1, "metaInformation.duration":1,
+                        tasks: { "$filter": {
+                            input: '$tasks',
+                            as: 'tasks',
+                            cond: { "$in": ['$$tasks._id', taskIds]}
+                        }}
+                    }}]
+                   
+                    projectDocument = await database.models.projects.aggregate(aggregateData);
+                }
+              
                 if (!projectDocument.length) {
                     throw {
                         message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,

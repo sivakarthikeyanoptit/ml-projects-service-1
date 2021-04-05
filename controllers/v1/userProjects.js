@@ -1288,4 +1288,51 @@ module.exports = class UserProjects extends Abstract {
             }
         })
     }
+
+
+     /**
+    * @api {get} /improvement-project/api/v1/userProjects/share/:projectId
+    * Share project and task pdf report.
+    * @apiVersion 1.0.0
+    * @apiGroup User Projects
+    * @apiSampleRequest /improvement-project/api/v1/userProjects/share/:projectId
+    * @apiUse successBody
+    * @apiUse errorBody
+    */
+
+    /**
+      * Share project and task pdf report.
+      * @method
+      * @name share
+      * @param {Object} req - request data.
+      * @param {String} req.params._id - projectId 
+      * @returns {JSON} Downloadable pdf url.
+     */
+
+    async share(req) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let taskIds = req.query.tasks ? req.query.tasks.split(",") : [];
+
+                let report = await userProjectsHelper.share(
+                    req.params._id,
+                    taskIds,
+                    req.userDetails.userToken
+                );
+
+                return resolve({
+                    message: report.message,
+                    result: report.data
+                });
+
+            } catch (error) {
+                return reject({
+                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+        })
+    }
 };

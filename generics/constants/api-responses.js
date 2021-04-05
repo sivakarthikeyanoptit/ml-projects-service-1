@@ -109,5 +109,6 @@ module.exports = {
     "IMPROVEMENT_PROJECT_SOLUTION_NOT_CREATED" : "Improvement project solution could not be created",
     "PROJECT_TEMPLATES_FETCHED" : "List of project templates fetched successfully",
     "PROJECT_CREATED": "Project created successfully",
-    "USER_PROJECT_NOT_CREATED": "Could not created user project"
+    "USER_PROJECT_NOT_CREATED": "Could not created user project",
+    "COULD_NOT_GENERATE_PDF_REPORT": "Could not generate pdf report"
 };

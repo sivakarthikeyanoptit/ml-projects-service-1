@@ -1307,6 +1307,9 @@ module.exports = class UserProjectsHelper {
 
                 let aggregateData = [];
                 aggregateData.push(matchQuery);
+                aggregateData.push({
+                    $sort : { "syncedAt" : -1 }
+                })
 
                 if (groupBy !== "") {
                     aggregateData.push({

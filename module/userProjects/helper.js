@@ -1307,6 +1307,9 @@ module.exports = class UserProjectsHelper {
 
                 let aggregateData = [];
                 aggregateData.push(matchQuery);
+                aggregateData.push({
+                    $sort : { "syncedAt" : -1 }
+                })
 
                 if (groupBy !== "") {
                     aggregateData.push({
@@ -2574,7 +2577,8 @@ module.exports = class UserProjectsHelper {
                             "startDate",
                             "endDate",
                             "tasks",
-                            "categories"
+                            "categories",
+                            "programInformation.name"
                         ]
                     );
                 }
@@ -2585,6 +2589,7 @@ module.exports = class UserProjectsHelper {
                     { "$match": { _id: ObjectId(projectId)} },
                     { "$project": {
                         "status": 1, "title": 1, "startDate": 1, "metaInformation.goal": 1, "metaInformation.duration":1,
+                        "categories" : 1, "programInformation.name": 1,
                         tasks: { "$filter": {
                             input: '$tasks',
                             as: 'tasks',
@@ -2605,7 +2610,7 @@ module.exports = class UserProjectsHelper {
                 projectDocument = projectDocument[0];
                 projectDocument.goal = projectDocument.metaInformation ? projectDocument.metaInformation.goal : "";
                 projectDocument.duration = projectDocument.metaInformation ? projectDocument.metaInformation.duration : "";
-        
+                projectDocument.programName = projectDocument.programInformation ? projectDocument.programInformation.name : "";
                 projectDocument.category = [];
 
                 if (projectDocument.categories && projectDocument.categories.length > 0) {
@@ -2616,13 +2621,14 @@ module.exports = class UserProjectsHelper {
 
                 delete projectDocument.categories;
                 delete projectDocument.metaInformation;
+                delete projectDocument.programInformation;
                
                 let response = await dhitiService.projectAndTaskReport(userToken, projectDocument, projectPdf);
 
                 if (response && response.success == true) {
                     return resolve({
                         success: true,
-                        message: CONSTANTS.apiResponses.REPORT_GENERATED,
+                        message: CONSTANTS.apiResponses.REPORT_GENERATED_SUCCESSFULLY,
                         data: {
                             data: {
                                 downloadUrl: response.data.pdfUrl
@@ -2650,6 +2656,102 @@ module.exports = class UserProjectsHelper {
         })
     }
 
+    /**
+    * Get list of user projects with the targetted ones.
+    * @method
+    * @name userAssigned 
+    * @param {String} userId - Logged in user id.
+    * @param {Number} pageSize - Page size.
+    * @param {Number} pageNo - Page No.
+    * @param {String} search - Search text.
+    * @param {String} filter - filter text.
+    * @returns {Object}
+   */
+
+  static userAssigned( userId,pageSize,pageNo,search, filter ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let query = {
+                userId : userId,
+                isDeleted : false,
+                programId : { $exists : true }
+            }
+
+            let searchQuery = [];
+
+            if (search !== "") {
+                searchQuery = [
+                    { "title" : new RegExp(search, 'i') },
+                    { "description" : new RegExp(search, 'i') }
+                ];
+            }
+
+            if ( filter && filter !== "" ) {
+                if( filter === CONSTANTS.common.CREATED_BY_ME ) {
+                    query["isAPrivateProgram"] = {
+                        $ne : false
+                    };
+                } else if( filter == CONSTANTS.common.ASSIGN_TO_ME ) {
+                    query["isAPrivateProgram"] = false;
+                }
+            }
+
+            let projects = await this.projects(
+                query,
+                pageSize,
+                pageNo,
+                searchQuery,    
+                ["title", "description","solutionId","programId","programInformation.name","projectTemplateId","solutionExternalId"]
+            );
+
+            let totalCount = 0;
+            let data = [];
+
+            if( projects.success && projects.data ) {
+
+                totalCount = projects.data.count;
+                data = projects.data.data;
+
+                if( data.length > 0 ) {
+                    data.forEach( projectData => {
+                        projectData.name = projectData.title;
+                        projectData.programName = projectData.programInformation.name;
+                        delete projectData.programInformation;
+                        projectData.externalId = projectData.solutionExternalId;
+                        delete projectData.solutionExternalId;
+                        projectData.type = CONSTANTS.common.IMPROVEMENT_PROJECT;
+
+                        delete projectData.title;
+                    });
+                }
+            }
+            
+            return resolve({
+                success : true,
+                message : CONSTANTS.apiResponses.USER_ASSIGNED_PROJECT_FETCHED,
+                data : {
+                    data: data,
+                    count: totalCount
+                }
+            });
+
+        } catch (error) {
+            return resolve({
+                success : false,
+                message : error.message,
+                status : 
+                error.status ? 
+                error.status : HTTP_STATUS_CODE['internal_server_error'].status,
+                data : {
+                    description : CONSTANTS.common.PROJECT_DESCRIPTION,
+                    data : [],
+                    count : 0
+                }
+            });
+        }
+    })
+  }
 };
 
 /**

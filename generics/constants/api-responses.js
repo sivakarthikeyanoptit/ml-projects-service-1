@@ -110,5 +110,6 @@ module.exports = {
     "PROJECT_TEMPLATES_FETCHED" : "List of project templates fetched successfully",
     "PROJECT_CREATED": "Project created successfully",
     "USER_PROJECT_NOT_CREATED": "Could not created user project",
-    "COULD_NOT_GENERATE_PDF_REPORT": "Could not generate pdf report"
+    "COULD_NOT_GENERATE_PDF_REPORT": "Could not generate pdf report",
+    "REPORT_GENERATED_SUCCESSFULLY" : "Report generated succesfully"
 };

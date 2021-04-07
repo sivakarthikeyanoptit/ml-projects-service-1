@@ -1291,11 +1291,21 @@ module.exports = class UserProjects extends Abstract {
 
 
      /**
-    * @api {get} /improvement-project/api/v1/userProjects/share/:projectId
+    * @api {get} /improvement-project/api/v1/userProjects/share/:projectId?tasks=:taskId1,:taskId2
     * Share project and task pdf report.
     * @apiVersion 1.0.0
     * @apiGroup User Projects
-    * @apiSampleRequest /improvement-project/api/v1/userProjects/share/:projectId
+    * @apiSampleRequest /improvement-project/api/v1/userProjects/share/6065ced7e9259b7f0b1f5d66?tasks=4d074de7-7059-4d99-9da9-452b0d32e081
+     * @apiParamExample {json} Response:
+    * {
+    * "message": "Report generated succesfully",
+    * "status": 200,
+    * "result" : {
+    *   "data" : {
+    *      "downloadUrl": "http://localhost:4700/dhiti/api/v1/observations/pdfReportsUrl?id=dG1wLzVhNzZjMTY5LTA5YjAtNGU3Zi04ZmNhLTg0NDc5ZmI2YTNiNC0tODUyOA=="
+    * }
+    * }
+    * }
     * @apiUse successBody
     * @apiUse errorBody
     */

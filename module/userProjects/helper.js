@@ -2577,7 +2577,8 @@ module.exports = class UserProjectsHelper {
                             "startDate",
                             "endDate",
                             "tasks",
-                            "categories"
+                            "categories",
+                            "programInformation.name"
                         ]
                     );
                 }
@@ -2588,6 +2589,7 @@ module.exports = class UserProjectsHelper {
                     { "$match": { _id: ObjectId(projectId)} },
                     { "$project": {
                         "status": 1, "title": 1, "startDate": 1, "metaInformation.goal": 1, "metaInformation.duration":1,
+                        "categories" : 1, "programInformation.name": 1,
                         tasks: { "$filter": {
                             input: '$tasks',
                             as: 'tasks',
@@ -2608,7 +2610,7 @@ module.exports = class UserProjectsHelper {
                 projectDocument = projectDocument[0];
                 projectDocument.goal = projectDocument.metaInformation ? projectDocument.metaInformation.goal : "";
                 projectDocument.duration = projectDocument.metaInformation ? projectDocument.metaInformation.duration : "";
-        
+                projectDocument.programName = projectDocument.programInformation ? projectDocument.programInformation.name : "";
                 projectDocument.category = [];
 
                 if (projectDocument.categories && projectDocument.categories.length > 0) {
@@ -2619,13 +2621,14 @@ module.exports = class UserProjectsHelper {
 
                 delete projectDocument.categories;
                 delete projectDocument.metaInformation;
+                delete projectDocument.programInformation;
                
                 let response = await dhitiService.projectAndTaskReport(userToken, projectDocument, projectPdf);
 
                 if (response && response.success == true) {
                     return resolve({
                         success: true,
-                        message: CONSTANTS.apiResponses.REPORT_GENERATED,
+                        message: CONSTANTS.apiResponses.REPORT_GENERATED_SUCCESSFULLY,
                         data: {
                             data: {
                                 downloadUrl: response.data.pdfUrl

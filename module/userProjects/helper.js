@@ -1941,7 +1941,8 @@ module.exports = class UserProjectsHelper {
                         "programInformation.name", 
                         "projectTemplateId", 
                         "solutionExternalId",
-                        "lastDownloadedAt"
+                        "lastDownloadedAt",
+                        "hasAcceptedTAndC"
                     ]
                 );
 
@@ -2719,7 +2720,8 @@ module.exports = class UserProjectsHelper {
                     "programInformation.name",
                     "projectTemplateId",
                     "solutionExternalId",
-                    "lastDownloadedAt"
+                    "lastDownloadedAt",
+                    "hasAcceptedTAndC"
                 ]
             );
 

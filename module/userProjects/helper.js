@@ -1933,7 +1933,16 @@ module.exports = class UserProjectsHelper {
                     CONSTANTS.common.DEFAULT_PAGE_SIZE,
                     CONSTANTS.common.DEFAULT_PAGE_NO,
                     searchQuery,
-                    ["title", "description", "solutionId", "programId", "programInformation.name", "projectTemplateId", "solutionExternalId"]
+                    [
+                        "title", 
+                        "description", 
+                        "solutionId", 
+                        "programId", 
+                        "programInformation.name", 
+                        "projectTemplateId", 
+                        "solutionExternalId",
+                        "lastDownloadedAt"
+                    ]
                 );
 
                 let solutionIds = [];
@@ -2702,7 +2711,16 @@ module.exports = class UserProjectsHelper {
                 pageSize,
                 pageNo,
                 searchQuery,    
-                ["title", "description","solutionId","programId","programInformation.name","projectTemplateId","solutionExternalId"]
+                [
+                    "title", 
+                    "description",
+                    "solutionId",
+                    "programId",
+                    "programInformation.name",
+                    "projectTemplateId",
+                    "solutionExternalId",
+                    "lastDownloadedAt"
+                ]
             );
 
             let totalCount = 0;

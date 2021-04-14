@@ -1,15 +1,15 @@
 FROM node:12
 
-WORKDIR /opt/unnati
+WORKDIR /opt/projects
 
 #copy package.json file
-COPY package.json /opt/unnati
+COPY package.json /opt/projects
 
 #install node packges
 RUN npm install
 
 #copy all files 
-COPY . /opt/unnati
+COPY . /opt/projects
 
 #expose the application port
 EXPOSE 3000

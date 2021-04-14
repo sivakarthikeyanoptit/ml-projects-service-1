@@ -1,2 +1,2 @@
-# ml-improvement-service
-SL Improvement Service
+# ml-projects-service
+ML projects Service

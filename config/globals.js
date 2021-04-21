@@ -10,9 +10,6 @@
 const fs = require("fs");
 const path = require("path");
 const requireAll = require("require-all");
-const bunyan = require("bunyan");
-const bunyanFormat = require('bunyan-format');
-const formatOut = bunyanFormat({ outputMode: 'short' });
 
 module.exports = function () {
   global.async = require("async");
@@ -26,15 +23,8 @@ module.exports = function () {
   global.CSV_FILE_STREAM = require(PROJECT_ROOT_DIRECTORY + "/generics/file-stream");
   require("./connections");
 
-  global.ENABLE_CONSOLE_LOGGING = process.env.ENABLE_CONSOLE_LOGGING || "OFF";
-  global.ENABLE_FILE_LOGGING = process.env.ENABLE_FILE_LOGGING || "OFF";
-
   global.HTTP_STATUS_CODE = 
   require(GENERICS_FILES_PATH + "/http-status-codes");
-
-  global.REQUEST_TIMEOUT_FOR_REPORTS = 
-  process.env.REQUEST_TIMEOUT_FOR_REPORTS || 
-  process.env.DEFAULT_REQUEST_TIMEOUT_FOR_REPORTS;
 
   // Load database models.
   global.models = requireAll({
@@ -116,34 +106,6 @@ module.exports = function () {
        global[name + 'Consumer'] = 
       require(PROJECT_ROOT_DIRECTORY + "/generics/kafka/consumers/" + file);
     }
-  });
-
-  // Load log file
-  global.LOGGER = bunyan.createLogger({
-    name: 'information',
-    level: "debug",
-    streams: [{
-      stream: formatOut
-    }, {
-      type: "rotating-file",
-      path: PROJECT_ROOT_DIRECTORY + "/logs/debug.log",
-      period: "1d", // daily rotation
-      count: 3 // keep 3 back copies
-    }]
-  });
-
-  // Load exception log file
-  global.EXCEPTION_LOGGER = bunyan.createLogger({
-    name: 'information',
-    level: "debug",
-    streams: [{
-      stream: formatOut
-    }, {
-      type: "rotating-file",
-      path: PROJECT_ROOT_DIRECTORY + "/logs/exceptions.log",
-      period: "1d", // daily rotation
-      count: 3 // keep 3 back copies
-    }]
   });
 
 };

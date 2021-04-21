@@ -17,22 +17,23 @@ const ObjectId = mongoose.Types.ObjectId;
  * Mongodb setup.
  * @method
  * @name DB
- * @param  {Object} config - mongodb configurations information.
 */
 
-const DB = function(config) {
+const DB = function() {
   mongoose.set('useCreateIndex', true)
   mongoose.set('useFindAndModify', false)
   mongoose.set('useUnifiedTopology', true)
   
   const db = mongoose.createConnection(
-    config.host + ":" + config.port + "/" + config.database,
-    config.options
+    process.env.MONGODB_URL,
+    {
+      useNewUrlParser: true
+    }
   );
   
   db.on("error", console.error.bind(console, "connection error:"));
   db.once("open", function() {
-    LOGGER.debug("Connected to DB");
+    console.log("Connected to DB");
   });
 
   const createModel = function(opts) {

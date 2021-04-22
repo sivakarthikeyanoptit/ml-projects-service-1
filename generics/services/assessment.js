@@ -8,7 +8,7 @@
  //dependencies
 const request = require('request');
 
-const ASSESSMENT_URL = process.env.ML_SURVEY_SERVICE_URL + "/";
+const ASSESSMENT_URL = process.env.ML_SURVEY_SERVICE_URL;
 
 /**
   * Assessment create

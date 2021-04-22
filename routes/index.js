@@ -13,9 +13,7 @@ const inputValidator = require(PROJECT_ROOT_DIRECTORY + "/generics/middleware/va
 
 module.exports = function (app) {
   
-  if (process.env.NODE_ENV !== "testing") {
-    app.use(authenticator);
-  }
+  app.use(authenticator);
   app.use(pagination);
 
   var router = async function (req, res, next) {

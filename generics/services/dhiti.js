@@ -8,7 +8,7 @@
 //dependencies
 
 const request = require('request');
-const reportsUrl = process.env.ML_REPORTS_SERVICE_URL + "/";
+const reportsUrl = process.env.ML_REPORTS_SERVICE_URL;
 
 /**
   * To get view full report pdf

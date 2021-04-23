@@ -443,73 +443,6 @@ const userPrivatePrograms = function ( token ) {
 }
 
 /**
-  * Update solution
-  * @function
-  * @name getUserOrganisationsAndRootOrganisations
-  * @param {String} token - Logged in user token.
-  * @param {String} userId - User id.
-  * @returns {JSON} - Update solutions.
-*/
-
-const getUserOrganisationsAndRootOrganisations = function ( token,userId = "" ) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            
-            let url = 
-            KENDRA_URL + 
-            CONSTANTS.endpoints.GET_USER_ORGANISATIONS;
-
-            if( userId !== "" ) {
-                url = url + "/" + userId;
-            }
-
-            const options = {
-                headers : {
-                    "content-type": "application/json",
-                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
-                    "x-authenticated-user-token" : token
-                }
-            };
-
-            request.post(url,options,kendraCallback);
-
-            function kendraCallback(err, data) {
-
-                let result = {
-                    success : true
-                };
-
-                if (err) {
-                    result.success = false;
-                } else {
-
-                    let response = JSON.parse(data.body);
-                    if( response.status === HTTP_STATUS_CODE['ok'].status ) {
-                        result["data"] = response.result;
-                    } else {
-                        result.success = false;
-                    }
-
-                }
-
-                return resolve(result);
-            }
-
-        } catch (error) {
-            return reject(error);
-        }
-    })
-}
-/**
-  * Get presigned url
-  * @function
-  * @name getPreSignedUrl
-  * @param {Array} fileNames - array of filenames
-  * @returns {JSON} - preSigned urls.
-*/
-
-
-/**
   * Get list of users by entity and role.
   * @function
   * @name getUsersByEntityAndRole
@@ -743,7 +676,6 @@ module.exports = {
     getProfile : getProfile,
     updateUserProfile : updateUserProfile,
     userPrivatePrograms : userPrivatePrograms,
-    getUserOrganisationsAndRootOrganisations : getUserOrganisationsAndRootOrganisations,
     getUsersByEntityAndRole : getUsersByEntityAndRole,
     createSolution: createSolution,
     solutionBasedOnRoleAndLocation : solutionBasedOnRoleAndLocation,

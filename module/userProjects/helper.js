@@ -721,20 +721,22 @@ module.exports = class UserProjectsHelper {
                     )
                 }
 
-                let userOrganisations =
-                    await kendraService.getUserOrganisationsAndRootOrganisations(
-                        userToken
-                    );
+                // <- Dirty fix . Currently not reuired.
 
-                if (!userOrganisations.success) {
-                    throw {
-                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                        status: HTTP_STATUS_CODE['bad_request'].status
-                    }
-                }
+                // let userOrganisations =
+                //     await kendraService.getUserOrganisationsAndRootOrganisations(
+                //         userToken
+                //     );
 
-                libraryProjects.data.createdFor = userOrganisations.data.createdFor;
-                libraryProjects.data.rootOrganisations = userOrganisations.data.rootOrganisations;
+                // if (!userOrganisations.success) {
+                //     throw {
+                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                //         status: HTTP_STATUS_CODE['bad_request'].status
+                //     }
+                // }
+
+                libraryProjects.data.createdFor = [];
+                libraryProjects.data.rootOrganisations = [];
 
                 libraryProjects.data.userId = libraryProjects.data.updatedBy = libraryProjects.data.createdBy = userId;
                 libraryProjects.data.lastDownloadedAt = new Date();
@@ -802,22 +804,26 @@ module.exports = class UserProjectsHelper {
 
                 creationData["userId"] = creationData["createdBy"] = creationData["updatedBy"] = userId;
 
-                let userOrganisations =
-                    await kendraService.getUserOrganisationsAndRootOrganisations(
-                        userToken
-                    );
+                // <- Dirty fix . Not required currently.
+                // let userOrganisations =
+                //     await kendraService.getUserOrganisationsAndRootOrganisations(
+                //         userToken
+                //     );
 
-                if (!userOrganisations.success) {
-                    throw {
-                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                        status: HTTP_STATUS_CODE['bad_request'].status
-                    }
-                }
+                // if (!userOrganisations.success) {
+                //     throw {
+                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                //         status: HTTP_STATUS_CODE['bad_request'].status
+                //     }
+                // }
 
-                if (userOrganisations.data) {
-                    creationData.createdFor = userOrganisations.data.createdFor;
-                    creationData.rootOrganisations = userOrganisations.data.rootOrganisations;
-                }
+                // if (userOrganisations.data) {
+                //     creationData.createdFor = userOrganisations.data.createdFor;
+                //     creationData.rootOrganisations = userOrganisations.data.rootOrganisations;
+                // }
+
+                creationData.createdFor = userOrganisations.data.createdFor;
+                creationData.rootOrganisations = userOrganisations.data.rootOrganisations;
 
                 let userProject = await database.models.projects.create(
                     creationData
@@ -1809,24 +1815,30 @@ module.exports = class UserProjectsHelper {
                 result.createdBy = userId;
                 result.updatedBy = userId;
 
-                let userOrganisations =
-                    await kendraService.getUserOrganisationsAndRootOrganisations(
-                        userToken,
-                        userId
-                    );
+                // <- Dirty fix. Not required currently.
 
-                if (!userOrganisations.success) {
-                    throw {
-                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                        status: HTTP_STATUS_CODE['bad_request'].status
-                    }
-                }
+                // let userOrganisations =
+                //     await kendraService.getUserOrganisationsAndRootOrganisations(
+                //         userToken,
+                //         userId
+                //     );
 
-                result.createdFor =
-                    userOrganisations.data.createdFor;
+                // if (!userOrganisations.success) {
+                //     throw {
+                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                //         status: HTTP_STATUS_CODE['bad_request'].status
+                //     }
+                // }
 
-                result.rootOrganisations =
-                    userOrganisations.data.rootOrganisations;
+                // result.createdFor =
+                //     userOrganisations.data.createdFor;
+
+                // result.rootOrganisations =
+                //     userOrganisations.data.rootOrganisations;
+
+                result.createdFor = [];
+
+                result.rootOrganisations = [];
 
                 result.assesmentOrObservationTask = false;
 
@@ -2296,24 +2308,30 @@ module.exports = class UserProjectsHelper {
                 result.createdBy = userId;
                 result.updatedBy = userId;
 
-                let userOrganisations =
-                await kendraService.getUserOrganisationsAndRootOrganisations(
-                    userToken,
-                    userId
-                );
+                // <- Dirty fix - Currently not required.
 
-                if (!userOrganisations.success) {
-                    throw {
-                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                        status: HTTP_STATUS_CODE['bad_request'].status
-                    }
-                }
+                // let userOrganisations =
+                // await kendraService.getUserOrganisationsAndRootOrganisations(
+                //     userToken,
+                //     userId
+                // );
 
-                result.createdFor =
-                    userOrganisations.data.createdFor;
+                // if (!userOrganisations.success) {
+                //     throw {
+                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                //         status: HTTP_STATUS_CODE['bad_request'].status
+                //     }
+                // }
 
-                result.rootOrganisations =
-                    userOrganisations.data.rootOrganisations;
+                // result.createdFor =
+                //     userOrganisations.data.createdFor;
+
+                // result.rootOrganisations =
+                //     userOrganisations.data.rootOrganisations;
+
+                result.createdFor = [];
+
+                result.rootOrganisations = [];
 
                 result.createdAt = new Date();
                 result.updatedAt = new Date();
@@ -2400,22 +2418,27 @@ module.exports = class UserProjectsHelper {
 
                 createProject["userId"] = createProject["createdBy"] = createProject["updatedBy"] = userId;
 
-                let userOrganisations =
-                    await kendraService.getUserOrganisationsAndRootOrganisations(
-                        userToken
-                    );
+                // <- Dirty fix - Not reuired currently
+                
+                // let userOrganisations =
+                //     await kendraService.getUserOrganisationsAndRootOrganisations(
+                //         userToken
+                //     );
 
-                if (!userOrganisations.success) {
-                    throw {
-                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                        status: HTTP_STATUS_CODE['bad_request'].status
-                    }
-                }
+                // if (!userOrganisations.success) {
+                //     throw {
+                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                //         status: HTTP_STATUS_CODE['bad_request'].status
+                //     }
+                // }
 
-                if (userOrganisations.data) {
-                    createProject.createdFor = userOrganisations.data.createdFor;
-                    createProject.rootOrganisations = userOrganisations.data.rootOrganisations;
-                }
+                // if (userOrganisations.data) {
+                //     createProject.createdFor = userOrganisations.data.createdFor;
+                //     createProject.rootOrganisations = userOrganisations.data.rootOrganisations;
+                // }
+
+                createProject.createdFor = userOrganisations.data.createdFor;
+                createProject.rootOrganisations = userOrganisations.data.rootOrganisations;
 
                 let projectData = await _projectData(data);
                 if (projectData && projectData.success == true) {

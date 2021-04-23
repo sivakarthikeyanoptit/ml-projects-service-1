@@ -22,7 +22,6 @@ module.exports = {
     USER_PRIVATE_PROGRAMS : "/api/v1/users/privatePrograms",
     UPDATE_SOLUTIONS : "/api/v1/solutions/updateSolutions",
     LIST_PROGRAMS : "/api/v1/programs/list",
-    GET_USER_ORGANISATIONS : "/api/v1/users/getUserOrganisationsAndRootOrganisations",
     PRESIGNED_GCP_URL : "/api/v1/cloud-services/gcp/preSignedUrls", // Kendra service
     PRESIGNED_AWS_URL : "/api/v1/cloud-services/aws/preSignedUrls", // Kendra service
     PRESIGNED_AZURE_URL : "/api/v1/cloud-services/azure/preSignedUrls", // Kendra service,

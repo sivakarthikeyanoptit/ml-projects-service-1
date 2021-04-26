@@ -12,6 +12,56 @@ const fs = require("fs");
 const KENDRA_URL = process.env.ML_CORE_SERVICE_URL;
 
 /**
+  * Get downloadable file.
+  * @function
+  * @name getDownloadableUrl
+  * @param {Object} bodyData - body data.
+  * @returns {Array} Downloadable file.
+*/
+
+const getDownloadableUrl = function (bodyData) {
+
+    let fileDownloadUrl = KENDRA_URL + CONSTANTS.endpoints.FILES_DOWNLOADABLE_URL;
+
+    return new Promise((resolve, reject) => {
+        try {
+
+            const kendraCallBack = function (err, data) {
+
+                let result = {
+                    success : true
+                };
+
+                if (err) {
+                    result.success = false;
+                } else {
+                    let response = data.body;
+
+                    if( response.status === HTTP_STATUS_CODE['ok'].status ) {
+                        result["data"] = response.result;
+                    } else {
+                        result.success = false;
+                    }
+                }
+
+                return resolve(result);
+            }
+
+            request.post(fileDownloadUrl, {
+                headers: {
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
+                },
+                json : bodyData
+            }, kendraCallBack);
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
+/**
   * List of entity types.
   * @function
   * @name entityTypesDocuments
@@ -667,6 +717,66 @@ const solutionDetailsBasedOnRoleAndLocation = function ( token,bodyData,solution
     })
 }
 
+/**
+  * Update solution
+  * @function
+  * @name getUserOrganisationsAndRootOrganisations
+  * @param {String} token - Logged in user token.
+  * @param {String} userId - User id.
+  * @returns {JSON} - Update solutions.
+*/
+
+const getUserOrganisationsAndRootOrganisations = function ( token,userId = "" ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let url = 
+            KENDRA_URL + 
+            CONSTANTS.endpoints.GET_USER_ORGANISATIONS;
+
+            if( userId !== "" ) {
+                url = url + "/" + userId;
+            }
+
+            const options = {
+                headers : {
+                    "content-type": "application/json",
+                    AUTHORIZATION : process.env.AUTHORIZATION,
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
+                    "x-authenticated-user-token" : token
+                }
+            };
+
+            request.post(url,options,kendraCallback);
+
+            function kendraCallback(err, data) {
+
+                let result = {
+                    success : true
+                };
+
+                if (err) {
+                    result.success = false;
+                } else {
+
+                    let response = JSON.parse(data.body);
+                    if( response.status === HTTP_STATUS_CODE['ok'].status ) {
+                        result["data"] = response.result;
+                    } else {
+                        result.success = false;
+                    }
+
+                }
+
+                return resolve(result);
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
+
 module.exports = {
     entityTypesDocuments : entityTypesDocuments,
     rolesDocuments : rolesDocuments,
@@ -679,6 +789,8 @@ module.exports = {
     getUsersByEntityAndRole : getUsersByEntityAndRole,
     createSolution: createSolution,
     solutionBasedOnRoleAndLocation : solutionBasedOnRoleAndLocation,
-    solutionDetailsBasedOnRoleAndLocation : solutionDetailsBasedOnRoleAndLocation
+    solutionDetailsBasedOnRoleAndLocation : solutionDetailsBasedOnRoleAndLocation,
+    getDownloadableUrl : getDownloadableUrl,
+    getUserOrganisationsAndRootOrganisations : getUserOrganisationsAndRootOrganisations
 };
 

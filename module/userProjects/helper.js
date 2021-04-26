@@ -721,22 +721,20 @@ module.exports = class UserProjectsHelper {
                     )
                 }
 
-                // <- Dirty fix . Currently not reuired.
+                let userOrganisations =
+                    await kendraService.getUserOrganisationsAndRootOrganisations(
+                        userToken
+                    );
 
-                // let userOrganisations =
-                //     await kendraService.getUserOrganisationsAndRootOrganisations(
-                //         userToken
-                //     );
+                if (!userOrganisations.success) {
+                    throw {
+                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                        status: HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
 
-                // if (!userOrganisations.success) {
-                //     throw {
-                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                //         status: HTTP_STATUS_CODE['bad_request'].status
-                //     }
-                // }
-
-                libraryProjects.data.createdFor = [];
-                libraryProjects.data.rootOrganisations = [];
+                libraryProjects.data.createdFor = userOrganisations.data.createdFor;
+                libraryProjects.data.rootOrganisations = userOrganisations.data.rootOrganisations;
 
                 libraryProjects.data.userId = libraryProjects.data.updatedBy = libraryProjects.data.createdBy = userId;
                 libraryProjects.data.lastDownloadedAt = new Date();
@@ -804,26 +802,22 @@ module.exports = class UserProjectsHelper {
 
                 creationData["userId"] = creationData["createdBy"] = creationData["updatedBy"] = userId;
 
-                // <- Dirty fix . Not required currently.
-                // let userOrganisations =
-                //     await kendraService.getUserOrganisationsAndRootOrganisations(
-                //         userToken
-                //     );
+                let userOrganisations =
+                    await kendraService.getUserOrganisationsAndRootOrganisations(
+                        userToken
+                    );
 
-                // if (!userOrganisations.success) {
-                //     throw {
-                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                //         status: HTTP_STATUS_CODE['bad_request'].status
-                //     }
-                // }
+                if (!userOrganisations.success) {
+                    throw {
+                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                        status: HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
 
-                // if (userOrganisations.data) {
-                //     creationData.createdFor = userOrganisations.data.createdFor;
-                //     creationData.rootOrganisations = userOrganisations.data.rootOrganisations;
-                // }
-
-                creationData.createdFor = userOrganisations.data.createdFor;
-                creationData.rootOrganisations = userOrganisations.data.rootOrganisations;
+                if (userOrganisations.data) {
+                    creationData.createdFor = userOrganisations.data.createdFor;
+                    creationData.rootOrganisations = userOrganisations.data.rootOrganisations;
+                }
 
                 let userProject = await database.models.projects.create(
                     creationData
@@ -1375,79 +1369,6 @@ module.exports = class UserProjectsHelper {
     }
 
     /**
-      * To get uploadable file url
-      * @method
-      * @name getFileUploadUrl 
-      * @param {Object} input - request files
-      * @param {String} userId - Logged in user id.
-      * @returns {Object} - returns file uploadable urls
-    */
-    static getFileUploadUrl(input, userId) {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                let allFileNames = [];
-                var requestFileNames = {};
-                let projectIds = Object.keys(input);
-                projectIds.map(projectId => {
-                    let images = input[projectId].images;
-                    requestFileNames[projectId] = [];
-                    if (images && images.length > 0) {
-                        images.map(image => {
-                            var fileName = userId + "/" + projectId + "/" + uuidv4() + "_" + image;
-                            fileName = (fileName.replace(/\s+/g, '')).trim();
-                            requestFileNames[fileName] = {
-                                projectId: projectId,
-                                name: image
-                            }
-                            allFileNames.push(fileName);
-                        });
-                    }
-                });
-
-                let fileUploadResponse = {};
-                let response = await kendraService.getPreSignedUrl(allFileNames);
-
-                if (!response.success) {
-                    throw {
-                        message: CONSTANTS.apiResponses.FAILED_TO_GENERATE_PRESSIGNED_URLS
-                    };
-                }
-
-                if (response.data.result && response.data.result.length > 0) {
-                    response.data.result = response.data.result.map(element => {
-
-                        let fileInfo = requestFileNames[element.file].projectId;
-                        if (fileUploadResponse[fileInfo]) {
-                            element.file = requestFileNames[element.file].name;
-                            fileUploadResponse[fileInfo]['images'].push(element);
-                        } else {
-                            fileUploadResponse[fileInfo] = {
-                                images: []
-                            }
-                            element.file = requestFileNames[element.file].name;
-                            fileUploadResponse[fileInfo]['images'].push(element);
-                        }
-                    })
-                }
-
-                return resolve({
-                    success: true,
-                    message: CONSTANTS.apiResponses.PRESSIGNED_URLS_GENERATED,
-                    data: fileUploadResponse
-                });
-
-            } catch (error) {
-                return resolve({
-                    success: false,
-                    message: error.message,
-                    data: []
-                });
-            }
-        })
-    }
-
-    /**
     * Get tasks from a user project.
     * @method
     * @name tasks 
@@ -1815,30 +1736,25 @@ module.exports = class UserProjectsHelper {
                 result.createdBy = userId;
                 result.updatedBy = userId;
 
-                // <- Dirty fix. Not required currently.
+                let userOrganisations =
+                    await kendraService.getUserOrganisationsAndRootOrganisations(
+                        userToken,
+                        userId
+                    );
 
-                // let userOrganisations =
-                //     await kendraService.getUserOrganisationsAndRootOrganisations(
-                //         userToken,
-                //         userId
-                //     );
+                if (!userOrganisations.success) {
+                    throw {
+                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                        status: HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
 
-                // if (!userOrganisations.success) {
-                //     throw {
-                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                //         status: HTTP_STATUS_CODE['bad_request'].status
-                //     }
-                // }
+                result.createdFor =
+                    userOrganisations.data.createdFor;
 
-                // result.createdFor =
-                //     userOrganisations.data.createdFor;
+                result.rootOrganisations =
+                    userOrganisations.data.rootOrganisations;
 
-                // result.rootOrganisations =
-                //     userOrganisations.data.rootOrganisations;
-
-                result.createdFor = [];
-
-                result.rootOrganisations = [];
 
                 result.assesmentOrObservationTask = false;
 
@@ -2308,30 +2224,24 @@ module.exports = class UserProjectsHelper {
                 result.createdBy = userId;
                 result.updatedBy = userId;
 
-                // <- Dirty fix - Currently not required.
+                let userOrganisations =
+                await kendraService.getUserOrganisationsAndRootOrganisations(
+                    userToken,
+                    userId
+                );
 
-                // let userOrganisations =
-                // await kendraService.getUserOrganisationsAndRootOrganisations(
-                //     userToken,
-                //     userId
-                // );
+                if (!userOrganisations.success) {
+                    throw {
+                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                        status: HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
 
-                // if (!userOrganisations.success) {
-                //     throw {
-                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                //         status: HTTP_STATUS_CODE['bad_request'].status
-                //     }
-                // }
+                result.createdFor =
+                    userOrganisations.data.createdFor;
 
-                // result.createdFor =
-                //     userOrganisations.data.createdFor;
-
-                // result.rootOrganisations =
-                //     userOrganisations.data.rootOrganisations;
-
-                result.createdFor = [];
-
-                result.rootOrganisations = [];
+                result.rootOrganisations =
+                    userOrganisations.data.rootOrganisations;
 
                 result.createdAt = new Date();
                 result.updatedAt = new Date();
@@ -2418,27 +2328,22 @@ module.exports = class UserProjectsHelper {
 
                 createProject["userId"] = createProject["createdBy"] = createProject["updatedBy"] = userId;
 
-                // <- Dirty fix - Not reuired currently
-                
-                // let userOrganisations =
-                //     await kendraService.getUserOrganisationsAndRootOrganisations(
-                //         userToken
-                //     );
+                let userOrganisations =
+                    await kendraService.getUserOrganisationsAndRootOrganisations(
+                        userToken
+                    );
 
-                // if (!userOrganisations.success) {
-                //     throw {
-                //         message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                //         status: HTTP_STATUS_CODE['bad_request'].status
-                //     }
-                // }
+                if (!userOrganisations.success) {
+                    throw {
+                        message: CONSTANTS.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                        status: HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
 
-                // if (userOrganisations.data) {
-                //     createProject.createdFor = userOrganisations.data.createdFor;
-                //     createProject.rootOrganisations = userOrganisations.data.rootOrganisations;
-                // }
-
-                createProject.createdFor = userOrganisations.data.createdFor;
-                createProject.rootOrganisations = userOrganisations.data.rootOrganisations;
+                if (userOrganisations.data) {
+                    createProject.createdFor = userOrganisations.data.createdFor;
+                    createProject.rootOrganisations = userOrganisations.data.rootOrganisations;
+                }
 
                 let projectData = await _projectData(data);
                 if (projectData && projectData.success == true) {

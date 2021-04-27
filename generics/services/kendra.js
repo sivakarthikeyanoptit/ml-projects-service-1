@@ -741,8 +741,6 @@ const getUserOrganisationsAndRootOrganisations = function ( token,userId = "" ) 
             const options = {
                 headers : {
                     "content-type": "application/json",
-                    AUTHORIZATION : process.env.AUTHORIZATION,
-                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
                     "x-authenticated-user-token" : token
                 }
             };

@@ -847,82 +847,6 @@ module.exports = class UserProjects extends Abstract {
         })
     }
 
-
-    /**
-    * @api {POST} /improvement-project/api/v1/userProjects/getFileUploadUrl getFileUploadUrl
-    * Get file upload urls
-    * @apiVersion 1.0.0
-    * @apiGroup User Projects
-    * @apiSampleRequest /improvement-project/api/v1/userProjects/getFileUploadUrl
-    * @apiParamExample {json} Request:
-    * {
-        "5f72f9998925ec7c60f79a91": {
-            "images": ["uploadFile.jpg", "uploadFile2.jpg"]
-        }
-      }
-    * @apiParamExample {json} Response:
-    * {
-        "message": "File upload urls generated successfully.",
-        "status": 200,
-        "result": {
-            "5f72f9998925ec7c60f79a91": {
-                "images": [
-                    {
-                        "file": "uploadFile.jpg",
-                        "url": "https://storage.googleapis.com/sl-dev-storage/01c04166-a65e-4e92-a87b-a9e4194e771d/5f72f9998925ec7c60f79a91/cd6763c9-a64a-4241-9907-4365970e8d11_uploadFile.jpg?GoogleAccessId=sl-dev-storage%40shikshalokam.iam.gserviceaccount.com&Expires=1605698490&Signature=ej6WHNOyx6EvUbAi81pDcYb3YqM7dkAhNT1Ktsf%2FTiRhwL%2ByhS89E1zRspIYlVOutlzoZXgRAl%2Fd0y%2BQcdryWYgfVAKAZmJVZtK3oVisLxhkFCKYeHAbzZ%2FadkCXdU3e1AVJGyRvKoN04Yr84%2BIa%2F1ApszOYDmVT%2Fn%2FOi4JSScbvzhe82bSe5xEr%2FPDwDq48%2FKgUhAc0faP%2FlAA2Wf7V1Ifuxc3quw9OpzvND8CKuugXZ%2FDZ6mhF0O80IXwP%2BFJOn4u9ydHqwXM3zDRDOO0WMh6VBLuvRFBRwJsrJG3v5zZMw0r5cYOIvkW4Tqo%2FefpXUDsvCVBTlZ9zBEdwx2Jshw%3D%3D",
-                        "payload": {
-                            "sourcePath": "01c04166-a65e-4e92-a87b-a9e4194e771d/5f72f9998925ec7c60f79a91/cd6763c9-a64a-4241-9907-4365970e8d11_uploadFile.jpg"
-                        },
-                        "cloudStorage": "GC"
-                    },
-                    {
-                        "file": "uploadFile2.jpg",
-                        "url": "https://storage.googleapis.com/sl-dev-storage/01c04166-a65e-4e92-a87b-a9e4194e771d/5f72f9998925ec7c60f79a91/1626ec00-f890-4f8b-9594-4342868e8703_uploadFile2.jpg?GoogleAccessId=sl-dev-storage%40shikshalokam.iam.gserviceaccount.com&Expires=1605698490&Signature=RucBanx70czWdcqNb5R3wTtATUCGl7BH6vUbx6GJqJJnxvVF179XLCgPHUcsv9eXNv9o0ptueFwA%2BHTAOA4d7g6tx2G7BYqua1zMsGIw5%2B57dUaIRfgXQgO%2Br5voQvKMDmSUJMx9nVY0Dfe5xce3xbcn4XjtQKopb%2Fjh1YqnCmnK7EujbU2tfk0ENBKHtEyd%2FdZlpCtQ7IqnZ%2FZJ73OZgX%2FjnFd18iJ2ce7%2FJ%2FwjUBUQnTBLPk7n%2FMFDkLfNMeSYlutwkwcApLj9cuLO%2FbmuEfT%2Fa%2BxzJz1xF639piOpTW6vAFHgXJz%2FLtR9nMUidMTOnhZdhTjjr%2BFiokqK03SGNw%3D%3D",
-                        "payload": {
-                            "sourcePath": "01c04166-a65e-4e92-a87b-a9e4194e771d/5f72f9998925ec7c60f79a91/1626ec00-f890-4f8b-9594-4342868e8703_uploadFile2.jpg"
-                        },
-                        "cloudStorage": "GC"
-                    }
-                ]
-            }
-        }
-    }
-    * @apiUse successBody
-    * @apiUse errorBody
-    */
-    
-
- /**
- * Get file upload urls
- * @name getFileUploadUrl
- * @param {*} req 
- *  api is to get getFileUploadUrl Urls of files
- * @returns {JSON} returns file upload url.
- */
-
-    async getFileUploadUrl(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                const fileUploadUrls = await userProjectsHelper.getFileUploadUrl(
-                    req.body,
-                    req.userDetails.userInformation.userId
-                );
-                return resolve({
-                    message: fileUploadUrls.message,
-                    result: fileUploadUrls.data
-                });
-
-            } catch (error) {
-                return reject({
-                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-                    errorObject: error
-                });
-            }
-        })
-    }
-
    /**
     * @api {post} /improvement-project/api/v1/userProjects/tasksStatus/:projectId
     * User Project tasks status
@@ -1392,6 +1316,69 @@ module.exports = class UserProjects extends Abstract {
                     message: report.message,
                     result: report.data
                 });
+
+            } catch (error) {
+                return reject({
+                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+        })
+    }
+
+    /**
+    * @api {get} /improvement-project/api/v1/userProjects/importedProjects/:programId
+    * @apiVersion 1.0.0
+    * @apiGroup Lists of User Imported Projects
+    * @apiSampleRequest /improvement-project/api/v1/userProjects/importedProjects/60545d541fc23d6d2d44c0c9
+    * @apiParamExample {json} Response:
+    {
+    "message": "List of imported projects fetched",
+    "status": 200,
+    "result": [
+        {
+            "_id": "60793b80bd49095a19ddeae1",
+            "description": "",
+            "title": "Project with learning resources",
+            "projectTemplateId": "60546a4cb807066d9cddba21",
+            "programInformation": {
+                "_id": "60545d541fc23d6d2d44c0c9",
+                "externalId": "PGM-3542-3.8.0_testing_program-2",
+                "description": "3.8.0 testing program - 2",
+                "name": "3.8.0 testing program - 2"
+            },
+            "solutionInformation": {
+                "_id": "605468721fc23d6d2d44c0cb",
+                "externalId": "IMP-3542_solution2",
+                "description": "",
+                "name": "Project with learning resources"
+            }
+        }
+    ]}
+    * @apiUse successBody
+    * @apiUse errorBody
+    */
+
+    /*
+    * List of user imported projects
+    * @method
+    * @name importedProjects
+    * @returns {JSON} List of imported projects.
+     */
+
+    async importedProjects(req) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let importedProjects = await userProjectsHelper.importedProjects(
+                    req.userDetails.userInformation.userId,
+                    req.params._id ? req.params._id : ""
+                );
+
+                importedProjects["result"] = importedProjects["data"];
+
+                return resolve(importedProjects);
 
             } catch (error) {
                 return reject({

@@ -5,6 +5,11 @@
  * Description : Root file.
  */
 
+console.log("#########################")
+console.log("DEPLOYMENT TESTING STARTS")
+console.log(process.env.APPLICATION_PORT)
+console.log(process.env.APPLICATION_ENV)
+
 require("dotenv").config();
 
 // express
@@ -21,10 +26,10 @@ require("./config/globals")();
 // Check if all environment variables are provided.
 const environmentData = require("./envVariables")();
 
-if (!environmentData.success) {
-  console.log("Server could not start . Not all environment variable is provided");
-  process.exit();
-}
+//if (!environmentData.success) {
+  //console.log("Server could not start . Not all environment variable is provided");
+  //process.exit();
+//}
 
 //required modules
 const fileUpload = require("express-fileupload");

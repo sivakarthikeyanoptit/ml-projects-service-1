@@ -7,19 +7,14 @@
 
 // Dependencies
 const authenticator = require(PROJECT_ROOT_DIRECTORY + "/generics/middleware/authenticator");
-const slackClient = require(PROJECT_ROOT_DIRECTORY + "/generics/helpers/slack-communications");
 const pagination = require(PROJECT_ROOT_DIRECTORY + "/generics/middleware/pagination");
 const fs = require("fs");
 const inputValidator = require(PROJECT_ROOT_DIRECTORY + "/generics/middleware/validator");
 
 module.exports = function (app) {
-
-  const APPLICATION_BASE_URL = process.env.APPLICATION_BASE_URL;
   
-  if (process.env.NODE_ENV !== "testing") {
-    app.use(APPLICATION_BASE_URL, authenticator);
-  }
-  app.use(APPLICATION_BASE_URL, pagination);
+  app.use(authenticator);
+  app.use(pagination);
 
   var router = async function (req, res, next) {
 
@@ -93,16 +88,9 @@ module.exports = function (app) {
           });
         }
 
-        if(ENABLE_FILE_LOGGING === "ON") {
-          LOGGER.info("Response:", result);
-        }
-
-        if(ENABLE_CONSOLE_LOGGING === "ON") {
           console.log('-------------------Response log starts here-------------------');
           console.log(result);
           console.log('-------------------Response log ends here-------------------');
-        }
-
       }
       catch (error) {
         res.status(error.status ? error.status : HTTP_STATUS_CODE.bad_request.status).json({
@@ -110,60 +98,15 @@ module.exports = function (app) {
           message: error.message,
           result : error.result
         });
-
-        if ( error.status !== HTTP_STATUS_CODE.bad_request.status ) {
-          
-          let customFields = {
-            appDetails: '',
-            userDetails: "NON_LOGGED_IN_USER"
-          };
-  
-          if (req.userDetails) {
-            customFields = {
-              appDetails: req.headers["user-agent"],
-              userDetails: req.userDetails.firstName + " - " + req.userDetails.lastName + " - " + req.userDetails.email
-            };
-          }
-  
-          let toLogObject = {
-            slackErrorName: process.env.SLACK_ERROR_NAME,
-            color: process.env.SLACK_ERROR_MESSAGE_COLOR,
-            method: req.method,
-            url: req.url,
-            body: req.body && !_.isEmpty(req.body) ? req.body : "not provided",
-            errorMsg: "not provided",
-            errorStack: "not provided"
-          };
-  
-          if (error.message) {
-            toLogObject["errorMsg"] = JSON.stringify(error.message);
-          } else if (error.errorObject) {
-            toLogObject["errorMsg"] = error.errorObject.message;
-            toLogObject["errorStack"] = error.errorObject.stack;
-          }
-  
-          slackClient.sendMessageToSlack(_.merge(toLogObject, customFields));
-
-          if (ENABLE_FILE_LOGGING === "ON") {
-            EXCEPTION_LOGGER.info(toLogObject);
-          }
-
-          if (ENABLE_CONSOLE_LOGGING === "ON") {
-            console.log('-------------------Response log starts here-------------------');
-            console.log(toLogObject);
-            console.log('-------------------Response log ends here-------------------');
-          }
-          
-        }
         
       };
     }
   };
 
-  app.all(APPLICATION_BASE_URL + "api/:version/:controller/:method", inputValidator, router);
-  app.all(APPLICATION_BASE_URL + "api/:version/:controller/:file/:method", inputValidator, router);
-  app.all(APPLICATION_BASE_URL + "api/:version/:controller/:method/:_id", inputValidator, router);
-  app.all(APPLICATION_BASE_URL + "api/:version/:controller/:file/:method/:_id", inputValidator, router);
+  app.all("/api/:version/:controller/:method", inputValidator, router);
+  app.all("/api/:version/:controller/:file/:method", inputValidator, router);
+  app.all("/api/:version/:controller/:method/:_id", inputValidator, router);
+  app.all("/api/:version/:controller/:file/:method/:_id", inputValidator, router);
 
   app.use((req, res, next) => {
     res.status(HTTP_STATUS_CODE["not_found"].status).send(HTTP_STATUS_CODE["not_found"].message);

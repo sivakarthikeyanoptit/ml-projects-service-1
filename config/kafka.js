@@ -14,35 +14,34 @@ const SUBMISSION_TOPIC = process.env.SUBMISSION_TOPIC;
   * Kafka configurations.
   * @function
   * @name connect
-  * @param {Object} config - Kafka configurations data.
 */
 
-const connect = function(config) {
+const connect = function() {
 
     const Producer = kafka.Producer
     KeyedMessage = kafka.KeyedMessage
     
     const client = new kafka.KafkaClient({
-      kafkaHost : config.host
+      kafkaHost : process.env.KAFKA_URL
     });
 
     client.on('error', function(error) {
-        LOGGER.error("kafka connection error!")
+        console.log("kafka connection error!")
     });
 
     const producer = new Producer(client)
 
     producer.on('ready', function () {
-        LOGGER.info("Connected to Kafka");
+        console.log("Connected to Kafka");
     });
    
     producer.on('error', function (err) {
-        LOGGER.error("kafka producer creation error!")
+        console.log("kafka producer creation error!")
     })
 
     _sendToKafkaConsumers(
-      config.topics["submission"],
-      config.host
+      SUBMISSION_TOPIC,
+      process.env.KAFKA_URL
     );
 
     return {

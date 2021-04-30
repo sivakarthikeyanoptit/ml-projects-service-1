@@ -393,32 +393,33 @@ module.exports = class ProjectTemplatesHelper {
                                 }
                             }
 
-                            const kafkaMessage = 
-                            await kafkaProducersHelper.pushProjectToKafka({
-                                internal : false,
-                                text : 
-                                templateData.categories.length === 1 ?  
-                                `A new project has been added under ${templateData.categories[0].name} category in library.` : 
-                                `A new project has been added in library`,
-                                type : "information",
-                                action : "mapping",
-                                payload : {
-                                    project_id: createdTemplate._id
-                                },
-                                is_read : false,
-                                internal : false,
-                                title : "New project Available!",
-                                created_at : new Date(),
-                                appType : process.env.IMPROVEMENT_PROJECT_APP_TYPE,
-                                inApp:false,
-                                push: true,
-                                pushToTopic: true,
-                                topicName : process.env.NODE_ENV + "-" + process.env.IMPROVEMENT_PROJECT_APP_NAME + process.env.TOPIC_FOR_ALL_USERS
-                            });
+                            // <- Dirty fix . Not required
+                            // const kafkaMessage = 
+                            // await kafkaProducersHelper.pushProjectToKafka({
+                            //     internal : false,
+                            //     text : 
+                            //     templateData.categories.length === 1 ?  
+                            //     `A new project has been added under ${templateData.categories[0].name} category in library.` : 
+                            //     `A new project has been added in library`,
+                            //     type : "information",
+                            //     action : "mapping",
+                            //     payload : {
+                            //         project_id: createdTemplate._id
+                            //     },
+                            //     is_read : false,
+                            //     internal : false,
+                            //     title : "New project Available!",
+                            //     created_at : new Date(),
+                            //     appType : process.env.IMPROVEMENT_PROJECT_APP_TYPE,
+                            //     inApp:false,
+                            //     push: true,
+                            //     pushToTopic: true,
+                            //     topicName : process.env.NODE_ENV + "-" + process.env.IMPROVEMENT_PROJECT_APP_NAME + process.env.TOPIC_FOR_ALL_USERS
+                            // });
 
-                            if (kafkaMessage.status !== CONSTANTS.common.SUCCESS) {
-                                currentData["_SYSTEM_ID"] = CONSTANTS.apiResponses.COULD_NOT_PUSHED_TO_KAFKA;
-                            }
+                            // if (kafkaMessage.status !== CONSTANTS.common.SUCCESS) {
+                            //     currentData["_SYSTEM_ID"] = CONSTANTS.apiResponses.COULD_NOT_PUSHED_TO_KAFKA;
+                            // }
 
                         }
 
@@ -618,6 +619,13 @@ module.exports = class ProjectTemplatesHelper {
                 if( solutionData.data[0].type !== CONSTANTS.common.IMPROVEMENT_PROJECT ) {
                     throw {
                         message : CONSTANTS.apiResponses.IMPROVEMENT_PROJECT_SOLUTION_NOT_FOUND,
+                        status : HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
+
+                if( solutionData.data[0].projectTemplateId ) {
+                    throw {
+                        message : CONSTANTS.apiResponses.PROJECT_TEMPLATE_EXISTS_IN_SOLUTION,
                         status : HTTP_STATUS_CODE['bad_request'].status
                     }
                 }
@@ -1068,6 +1076,10 @@ module.exports = class ProjectTemplatesHelper {
                 }
 
                 let result = await _templateInformation(templateData[0])
+
+                if( !result.success ) {
+                    return resolve(result);
+                }
 
                 if( !templateData[0].isReusable ) {
                     

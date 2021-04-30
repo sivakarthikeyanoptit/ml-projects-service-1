@@ -1369,79 +1369,6 @@ module.exports = class UserProjectsHelper {
     }
 
     /**
-      * To get uploadable file url
-      * @method
-      * @name getFileUploadUrl 
-      * @param {Object} input - request files
-      * @param {String} userId - Logged in user id.
-      * @returns {Object} - returns file uploadable urls
-    */
-    static getFileUploadUrl(input, userId) {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                let allFileNames = [];
-                var requestFileNames = {};
-                let projectIds = Object.keys(input);
-                projectIds.map(projectId => {
-                    let images = input[projectId].images;
-                    requestFileNames[projectId] = [];
-                    if (images && images.length > 0) {
-                        images.map(image => {
-                            var fileName = userId + "/" + projectId + "/" + uuidv4() + "_" + image;
-                            fileName = (fileName.replace(/\s+/g, '')).trim();
-                            requestFileNames[fileName] = {
-                                projectId: projectId,
-                                name: image
-                            }
-                            allFileNames.push(fileName);
-                        });
-                    }
-                });
-
-                let fileUploadResponse = {};
-                let response = await kendraService.getPreSignedUrl(allFileNames);
-
-                if (!response.success) {
-                    throw {
-                        message: CONSTANTS.apiResponses.FAILED_TO_GENERATE_PRESSIGNED_URLS
-                    };
-                }
-
-                if (response.data.result && response.data.result.length > 0) {
-                    response.data.result = response.data.result.map(element => {
-
-                        let fileInfo = requestFileNames[element.file].projectId;
-                        if (fileUploadResponse[fileInfo]) {
-                            element.file = requestFileNames[element.file].name;
-                            fileUploadResponse[fileInfo]['images'].push(element);
-                        } else {
-                            fileUploadResponse[fileInfo] = {
-                                images: []
-                            }
-                            element.file = requestFileNames[element.file].name;
-                            fileUploadResponse[fileInfo]['images'].push(element);
-                        }
-                    })
-                }
-
-                return resolve({
-                    success: true,
-                    message: CONSTANTS.apiResponses.PRESSIGNED_URLS_GENERATED,
-                    data: fileUploadResponse
-                });
-
-            } catch (error) {
-                return resolve({
-                    success: false,
-                    message: error.message,
-                    data: []
-                });
-            }
-        })
-    }
-
-    /**
     * Get tasks from a user project.
     * @method
     * @name tasks 
@@ -1828,6 +1755,7 @@ module.exports = class UserProjectsHelper {
                 result.rootOrganisations =
                     userOrganisations.data.rootOrganisations;
 
+
                 result.assesmentOrObservationTask = false;
 
                 if (projectTemplateData[0].tasks && projectTemplateData[0].tasks.length > 0) {
@@ -2194,6 +2122,10 @@ module.exports = class UserProjectsHelper {
 
                         if( bodyData.referenceFrom ) {
                             projectCreation.data.referenceFrom = bodyData.referenceFrom;
+
+                            if( bodyData.submissions ) {
+                                projectCreation.data.submissions = bodyData.submissions;
+                            }
                         }
     
                         if( bodyData.role ) {
@@ -2571,7 +2503,8 @@ module.exports = class UserProjectsHelper {
                 let projectDocument = [];
 
                 let query = {
-                    _id: projectId
+                    _id: projectId,
+                    isDeleted: false
                 }
 
                 if (!taskIds.length ) {
@@ -2588,7 +2521,8 @@ module.exports = class UserProjectsHelper {
                             "endDate",
                             "tasks",
                             "categories",
-                            "programInformation.name"
+                            "programInformation.name",
+                            "description"
                         ]
                     );
                 }
@@ -2596,10 +2530,12 @@ module.exports = class UserProjectsHelper {
                     projectPdf = false;
                     
                     let aggregateData = [
-                    { "$match": { _id: ObjectId(projectId)} },
+
+                    { "$match": { _id: ObjectId(projectId), isDeleted: false } },
+
                     { "$project": {
                         "status": 1, "title": 1, "startDate": 1, "metaInformation.goal": 1, "metaInformation.duration":1,
-                        "categories" : 1, "programInformation.name": 1,
+                        "categories" : 1, "programInformation.name": 1, "description" : 1,
                         tasks: { "$filter": {
                             input: '$tasks',
                             as: 'tasks',
@@ -2627,6 +2563,25 @@ module.exports = class UserProjectsHelper {
                     projectDocument.categories.forEach( category => {
                         projectDocument.category.push(category.name);
                     })
+                }
+
+                let tasks = [];
+                if (projectDocument.tasks.length > 0) {
+                    projectDocument.tasks.forEach( task => {
+                        let subtasks = [];
+                        if (!task.isDeleted) {
+                           if (task.children.length > 0) {
+                               task.children.forEach(children => {
+                                   if (!children.isDeleted) {
+                                       subtasks.push(children);
+                                   }
+                               })
+                           }
+                           task.children = subtasks;
+                           tasks.push(task);
+                        }
+                    })
+                    projectDocument.tasks = tasks;
                 }
 
                 delete projectDocument.categories;
@@ -2774,6 +2729,58 @@ module.exports = class UserProjectsHelper {
                     data : [],
                     count : 0
                 }
+            });
+        }
+    })
+  }
+
+  /**
+    * List of user imported projects.
+    * @method
+    * @name importedProjects 
+    * @param {String} userId - Logged in user id.
+    * @param {String} programId - program id.
+    * @returns {Object}
+   */
+
+   static importedProjects( userId,programId ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let filterQuery = {
+                userId : userId,
+                referenceFrom : { $exists : true,$eq : CONSTANTS.common.OBSERVATION_REFERENCE_KEY },
+                isDeleted: false
+            };
+
+            if( programId !== "" ) {
+                filterQuery["programId"] = programId;
+            }
+
+            let importedProjects = await this.projectDocument(
+                filterQuery,
+                [
+                    "solutionInformation",
+                    "programInformation",
+                    "title",
+                    "description",
+                    "projectTemplateId"
+                ]
+            );
+
+            return resolve({
+                success : true,
+                message : CONSTANTS.apiResponses.IMPORTED_PROJECTS_FETCHED,
+                data : importedProjects
+            });
+
+        } catch (error) {
+            return resolve({
+                success : false,
+                message : error.message,
+                status : 
+                error.status ? 
+                error.status : HTTP_STATUS_CODE['internal_server_error'].status
             });
         }
     })

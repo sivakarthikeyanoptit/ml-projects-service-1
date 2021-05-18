@@ -10,6 +10,7 @@ const json2Csv = require('json2csv').Transform;
 const stream = require("stream");
 const fs = require("fs");
 const moment = require("moment-timezone");
+const DEFAULT_REPORTS_PATH = process.env.REPORTS_PATH;
 
 /**
     * FileStream
@@ -22,14 +23,14 @@ let FileStream = class FileStream {
     const currentDate = new Date();
     const fileExtensionWithTime = moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD_HH_mm") + ".csv";
     
-    if( !fs.existsSync("public")) {
-      fs.mkdirSync("public");
+    if( !fs.existsSync(process.env.PUBLIC_FOLDER_PATH)) {
+      fs.mkdirSync(process.env.PUBLIC_FOLDER_PATH);
     }
 
-    if( !fs.existsSync("public" + "/" + "reports")) {
-      fs.mkdirSync("public" + "/" + "reports");
+    if( !fs.existsSync(process.env.PUBLIC_FOLDER_PATH + "/" + process.env.CSV_REPORTS_PATH)) {
+      fs.mkdirSync(process.env.PUBLIC_FOLDER_PATH + "/" + process.env.CSV_REPORTS_PATH);
     }
-    const filePath = `${"public"}/${"reports"}/${moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD")}/`;
+    const filePath = `${process.env.PUBLIC_FOLDER_PATH}/${process.env.CSV_REPORTS_PATH}/${moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD")}/`;
     this.ensureDirectoryPath(filePath);
     this.input = new stream.Readable({ objectMode: true });
     this.fileName = filePath + fileName + "_" + fileExtensionWithTime;
@@ -61,7 +62,7 @@ let FileStream = class FileStream {
     try {
       fs.mkdirSync(filePath, { recursive: true });
     } catch (err) {
-      console.log(err)
+      logger.info(err)
       if (err.code !== 'EEXIST') throw err
     }
   }

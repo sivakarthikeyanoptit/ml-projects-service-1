@@ -2521,7 +2521,8 @@ module.exports = class UserProjectsHelper {
                             "endDate",
                             "tasks",
                             "categories",
-                            "programInformation.name"
+                            "programInformation.name",
+                            "description"
                         ]
                     );
                 }
@@ -2534,7 +2535,7 @@ module.exports = class UserProjectsHelper {
 
                     { "$project": {
                         "status": 1, "title": 1, "startDate": 1, "metaInformation.goal": 1, "metaInformation.duration":1,
-                        "categories" : 1, "programInformation.name": 1,
+                        "categories" : 1, "programInformation.name": 1, "description" : 1,
                         tasks: { "$filter": {
                             input: '$tasks',
                             as: 'tasks',

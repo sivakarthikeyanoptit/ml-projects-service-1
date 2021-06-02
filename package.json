@@ -9,7 +9,8 @@
   "scripts": {
     "test": "mocha --timeout 10000",
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "coverage": " nyc --reporter=lcov mocha --timeout 10000 test --exit"
   },
   "repository": {
     "type": "git",
@@ -62,7 +63,7 @@
     "xml-js": "^1.6.11",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
-    "mocha": "^6.2.2"
+    "mocha": "^6.2.2" 
   },
   "devDependencies": {
     "grunt-apidoc": "^0.11.0",

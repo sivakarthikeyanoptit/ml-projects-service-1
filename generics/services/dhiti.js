@@ -8,6 +8,7 @@
 //dependencies
 
 const request = require('request');
+const reportsUrl = process.env.ML_REPORTS_SERVICE_URL;
 
 /**
   * To get view full report pdf
@@ -21,9 +22,8 @@ const request = require('request');
 const viewFullReport = function (token,input) {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = 
-            process.env.DHITI_SERIVCE_HOST + 
-            process.env.DHITI_SERIVCE_BASE_URL +
+            const url =  
+            reportsUrl + 
             CONSTANTS.endpoints.VIEW_PROJECT_REPORT;
 
             let options = {
@@ -68,9 +68,8 @@ const viewFullReport = function (token,input) {
 const entityReport = function (token,input) {
   return new Promise(async (resolve, reject) => {
       try {
-          const url = 
-          process.env.DHITI_SERIVCE_HOST + 
-          process.env.DHITI_SERIVCE_BASE_URL +
+          const url =  
+          reportsUrl + 
           CONSTANTS.endpoints.ENTITY_REPORT;
 
           let options = {
@@ -116,9 +115,8 @@ const entityReport = function (token,input) {
 const projectAndTaskReport = function (token, input, projectPdf) {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = 
-            process.env.DHITI_SERIVCE_HOST + 
-            process.env.DHITI_SERIVCE_BASE_URL +
+            const url =  
+            reportsUrl + 
             CONSTANTS.endpoints.PROJECT_AND_TASK_REPORT + "?projectPdf=" + projectPdf;
           
             let options = {

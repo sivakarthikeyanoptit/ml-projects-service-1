@@ -9,6 +9,8 @@
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const keyCloakPublicKeyPath = (process.env.KEYCLOAK_PUBLIC_KEY_PATH && process.env.KEYCLOAK_PUBLIC_KEY_PATH != "") ? PROJECT_ROOT_DIRECTORY+"/"+process.env.KEYCLOAK_PUBLIC_KEY_PATH+"/" : PROJECT_ROOT_DIRECTORY+"/"+"keycloak-public-keys/" ;
+const PEM_FILE_BEGIN_STRING = "-----BEGIN PUBLIC KEY-----";
+const PEM_FILE_END_STRING = "-----END PUBLIC KEY-----";
 
 var respUtil = function (resp) {
   return {
@@ -95,12 +97,21 @@ module.exports = async function (req, res, next, token = "") {
 
   const kid = decoded.header.kid
   let cert = "";
-  let path = keyCloakPublicKeyPath + kid + '.pem';
+  let path = keyCloakPublicKeyPath + kid;
     
   if (fs.existsSync(path)) {
+
+    let accessKeyFile  = await fs.readFileSync(path);
+
+    if(accessKeyFile) {
+      if(!accessKeyFile.includes(PEM_FILE_BEGIN_STRING)){
+        cert = PEM_FILE_BEGIN_STRING+"\n"+accessKeyFile+"\n"+PEM_FILE_END_STRING;
+      }else {
+        cert = fs.readFileSync(path);
+      }  
+    }
     
-    cert = fs.readFileSync(path);
-    jwt.verify(token, cert, { algorithm: 'RS256' }, function (err, decode) {
+    jwt.verify(token, cert, { algorithm: ['sha1', 'RS256', 'HS256'] }, function (err, decode) {
 
       if (err) {
         return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
